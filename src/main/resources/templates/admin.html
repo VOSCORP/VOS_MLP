@@ -44,6 +44,42 @@
             </td>
         </tr>
     </table>
+    <h2 style="margin-top:36px;">Дисциплинарные замечания</h2>
+    <table style="width:100%; background:#fff; border-collapse:collapse; margin-top:12px;">
+        <tr style="text-align:left;"><th>Студент</th><th>Основание</th><th>Дата</th><th>Статус</th></tr>
+        <tr th:each="n : ${notices}" style="border-top:1px solid #e8ecfa;">
+            <td th:text="${n.student.fullName}"></td>
+            <td th:text="${n.reason}"></td>
+            <td th:text="${n.createdAt}"></td>
+            <td><span class="chip warn" th:text="${n.status.name()}"></span></td>
+        </tr>
+    </table>
+
+    <h2 style="margin-top:36px;">Предложения об отчислении</h2>
+    <table style="width:100%; background:#fff; border-collapse:collapse; margin-top:12px;">
+        <tr style="text-align:left;"><th>Студент</th><th>Группа</th><th>Замечаний</th><th>Предложение</th><th>Студент</th><th>Действия</th></tr>
+        <tr th:each="p : ${proposals}" style="border-top:1px solid #e8ecfa;">
+            <td th:text="${p.student.fullName}"></td>
+            <td th:text="${p.student.groupName}"></td>
+            <td th:text="${p.noticeCount}"></td>
+            <td>
+        <span class="chip"
+              th:classappend="${p.status.name() == 'CONFIRMED'} ? 'bad' : (${p.status.name() == 'REJECTED'} ? 'ok' : 'warn')"
+              th:text="${p.status.name() == 'CONFIRMED'} ? 'Подтверждено' : (${p.status.name() == 'REJECTED'} ? 'Отклонено' : 'Ждёт решения')"></span>
+            </td>
+            <td th:text="${p.student.status.name() == 'EXPELLED'} ? 'Отчислен' : 'Учится'"></td>
+            <td>
+                <form th:if="${p.status.name() == 'PENDING_ADMIN_APPROVAL'}"
+                      th:action="@{/admin/proposals/{id}/confirm(id=${p.id})}" method="post" style="display:inline;">
+                    <button class="btn btn-main" type="submit">Подтвердить отчисление</button>
+                </form>
+                <form th:if="${p.status.name() == 'PENDING_ADMIN_APPROVAL'}"
+                      th:action="@{/admin/proposals/{id}/reject(id=${p.id})}" method="post" style="display:inline;">
+                    <button class="btn btn-ghost" type="submit">Отклонить</button>
+                </form>
+            </td>
+        </tr>
+    </table>
 </main>
 </body>
 </html>

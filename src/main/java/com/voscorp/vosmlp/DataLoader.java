@@ -21,6 +21,10 @@ public class DataLoader implements CommandLineRunner {
         Student c = students.save(new Student("Смагулов Данияр", "24-ИТ-2"));
 
         attendances.save(new Attendance(a, "Математика", LocalDate.of(2026, 10, 19), AttendanceStatus.UNEXCUSED));
+        attendances.save(new Attendance(a, "Программирование", LocalDate.of(2026, 10, 20), AttendanceStatus.UNEXCUSED));
+        attendances.save(new Attendance(a, "История", LocalDate.of(2026, 10, 21), AttendanceStatus.UNEXCUSED));
+        attendances.save(new Attendance(a, "Английский язык", LocalDate.of(2026, 10, 21), AttendanceStatus.UNEXCUSED));
+        attendances.save(new Attendance(a, "Информатика", LocalDate.of(2026, 10, 22), AttendanceStatus.UNEXCUSED));
         attendances.save(new Attendance(b, "Программирование", LocalDate.of(2026, 10, 19), AttendanceStatus.EXCUSED));
         attendances.save(new Attendance(c, "Физика", LocalDate.of(2026, 10, 20), AttendanceStatus.UNEXCUSED));
     }
