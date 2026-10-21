@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Посещаемость</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<main style="padding: 40px 6vw;">
+    <h1>Посещаемость занятий</h1>
+    <table style="width:100%; background:#fff; border-collapse:collapse; margin-top:20px;">
+        <tr style="text-align:left;">
+            <th>Студент</th><th>Группа</th><th>Предмет</th><th>Дата</th><th>Статус</th>
+        </tr>
+        <tr th:each="item : ${items}" style="border-top:1px solid #e8ecfa;">
+            <td th:text="${item.student.fullName}"></td>
+            <td th:text="${item.student.groupName}"></td>
+            <td th:text="${item.subject}"></td>
+            <td th:text="${item.lessonDate}"></td>
+            <td>
+        <span class="chip"
+              th:classappend="${item.status.name() == 'EXCUSED'} ? 'ok' : 'bad'"
+              th:text="${item.status.name() == 'EXCUSED'} ? 'Уважительная причина' : 'Без причины'"></span>
+            </td>
+        </tr>
+    </table>
+</main>
+</body>
+</html>

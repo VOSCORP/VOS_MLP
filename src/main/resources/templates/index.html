@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VOS College — Система колледжа</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header class="nav">
+    <a class="logo" href="#top"><span class="logo-mark"></span>VOS College</a>
+    <nav>
+        <a href="#top" class="active">Главная</a>
+        <a href="#about">О системе</a>
+        <a href="#features">Возможности</a>
+        <a href="#contacts">Контакты</a>
+    </nav>
+    <div class="nav-actions">
+        <a class="btn btn-ghost" href="#">Войти</a>
+        <a class="btn btn-main" href="#">Регистрация</a>
+    </div>
+</header>
+
+<main id="top">
+    <section class="hero">
+        <div class="hero-text">
+            <h1>Система колледжа<br><span class="grad">всё в одном месте</span></h1>
+            <p>Платформа для студентов, преподавателей и администрации: посещаемость, документы, оценки и расписание без бумажных справок.</p>
+            <div class="hero-buttons">
+                <a class="btn btn-main btn-big" href="#">Войти в систему</a>
+                <a class="btn btn-ghost btn-big" href="#">Зарегистрироваться</a>
+            </div>
+        </div>
+
+        <div class="hero-card" aria-label="Пример журнала посещаемости">
+            <h2>Посещаемость сегодня</h2>
+            <ul class="rows">
+                <li><div><b>24-ИТ-1</b><span>Программирование</span></div><em class="chip ok">Подтверждено</em></li>
+                <li><div><b>24-ИТ-1</b><span>Математика</span></div><em class="chip warn">Требует подтверждения</em></li>
+                <li><div><b>24-ИТ-2</b><span>Физика</span></div><em class="chip bad">Не подтверждено</em></li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <article><h3>Посещаемость</h3><p>Преподаватель отмечает отсутствие, студент подаёт справку онлайн.</p></article>
+        <article><h3>Документы</h3><p>Заявления и справки с проверкой и понятным статусом.</p></article>
+        <article><h3>Оценки</h3><p>Электронный журнал и средний балл по предметам.</p></article>
+        <article><h3>Расписание</h3><p>Занятия по группам без пересечений аудиторий.</p></article>
+        <article><h3>Контроль</h3><p>Каждое действие записывается в журнал аудита.</p></article>
+    </section>
+
+    <section class="about" id="about">
+        <h2>Для кого эта система</h2>
+        <div class="roles">
+            <div>Студенты</div><div>Преподаватели</div><div>Администрация</div><div>Родители</div>
+        </div>
+    </section>
+</main>
+
+<footer id="contacts">VOS College · учебный проект · Spring Boot</footer>
+
+</body>
+</html>
