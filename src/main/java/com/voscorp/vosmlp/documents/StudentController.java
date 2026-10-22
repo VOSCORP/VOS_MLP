@@ -1,5 +1,8 @@
-package com.voscorp.vosmlp;
+package com.voscorp.vosmlp.documents;
 
+import com.voscorp.vosmlp.attendance.Attendance;
+import com.voscorp.vosmlp.attendance.AttendanceRepository;
+import com.voscorp.vosmlp.attendance.AttendanceStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +23,7 @@ public class StudentController {
     public String student(Model model) {
         model.addAttribute("absences", attendances.findByStatus(AttendanceStatus.UNEXCUSED));
         model.addAttribute("applications", applications.findAll());
-        return "student";
+        return "documents/documents";
     }
 
     @PostMapping("/student/apply")

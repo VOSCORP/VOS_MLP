@@ -1,5 +1,10 @@
-package com.voscorp.vosmlp;
+package com.voscorp.vosmlp.common;
 
+import com.voscorp.vosmlp.attendance.Attendance;
+import com.voscorp.vosmlp.attendance.AttendanceRepository;
+import com.voscorp.vosmlp.attendance.AttendanceStatus;
+import com.voscorp.vosmlp.students.Student;
+import com.voscorp.vosmlp.students.StudentRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;

@@ -1,4 +1,4 @@
-package com.voscorp.vosmlp;
+package com.voscorp.vosmlp.attendance;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;

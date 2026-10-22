@@ -1,4 +1,4 @@
-package com.voscorp.vosmlp;
+package com.voscorp.vosmlp.students;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

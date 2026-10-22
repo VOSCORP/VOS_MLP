@@ -1,5 +1,13 @@
-package com.voscorp.vosmlp;
+package com.voscorp.vosmlp.admin;
 
+import com.voscorp.vosmlp.attendance.Attendance;
+import com.voscorp.vosmlp.attendance.AttendanceRepository;
+import com.voscorp.vosmlp.attendance.AttendanceStatus;
+import com.voscorp.vosmlp.discipline.*;
+import com.voscorp.vosmlp.documents.*;
+import com.voscorp.vosmlp.students.Student;
+import com.voscorp.vosmlp.students.StudentRepository;
+import com.voscorp.vosmlp.students.StudentStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +42,7 @@ public class AdminController {
         model.addAttribute("applications", applications.findAll());
         model.addAttribute("proposals", proposals.findAll());
         model.addAttribute("notices", notices.findAll());
-        return "admin";
+        return "admin/admin";
     }
 
     @PostMapping("/admin/{id}/verify")

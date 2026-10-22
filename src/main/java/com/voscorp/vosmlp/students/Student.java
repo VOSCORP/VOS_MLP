@@ -1,4 +1,4 @@
-package com.voscorp.vosmlp;
+package com.voscorp.vosmlp.students;
 
 import jakarta.persistence.*;
 

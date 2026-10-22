@@ -1,5 +1,6 @@
-package com.voscorp.vosmlp;
+package com.voscorp.vosmlp.attendance;
 
+import com.voscorp.vosmlp.students.Student;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
