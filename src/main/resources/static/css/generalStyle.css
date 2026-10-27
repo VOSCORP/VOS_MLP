@@ -1,0 +1,131 @@
+/* =====================================================================
+   generalStyle.css — общие стили для ВСЕХ страниц:
+   палитра, сайдбар, верхняя панель, кнопки, карточки, таблицы, статусы.
+   Стили конкретной страницы лежат в static/css/pages/<страница>Style.css
+   ===================================================================== */
+
+:root {
+  /* ---- Палитра: цвета любимых персонажей ---- */
+  /* Снежка */
+  --snow-white: #F4EEF5;      /* фон страницы */
+  --snow-sky: #A8DFFF;        /* светлые акценты */
+  --snow-aqua: #6ED4F2;
+  --snow-night: #0B1E3B;      /* сайдбар */
+  --snow-royal: #2038D9;      /* основной цвет, главные кнопки */
+  --snow-deep: #1A249C;
+  /* Твайлайт Спаркл */
+  --twilight-ink: #1E1E2A;    /* основной текст */
+  --twilight-navy: #2B2D6E;   /* заголовки */
+  --twilight-violet: #8A4BB0; /* второй цвет градиента */
+  /* Пинки Пай */
+  --pinkie-pink: #E8438A;     /* только декор (на белом текст не читается) */
+  /* Рарити */
+  --rarity-mist: #EDEAF4;     /* мягкие подложки */
+  --rarity-plum: #4B2A7B;     /* вторичный текст */
+
+  /* ---- Статусы: Рейнбоу Дэш. Только для бейджей статусов ---- */
+  --status-ok: #6CC24A;
+  --status-warn: #F5A03A;
+  --status-bad: #E8403C;
+
+  /* ---- Смысловые переменные (используем в стилях именно их) ---- */
+  --bg: var(--snow-white);
+  --surface: #FFFFFF;
+  --surface-soft: var(--rarity-mist);
+  --text: var(--twilight-ink);
+  --text-muted: var(--rarity-plum);
+  --heading: var(--twilight-navy);
+  --primary: var(--snow-royal);
+  --line: #DDD8EA;
+  --grad: linear-gradient(100deg, var(--snow-royal), var(--twilight-violet) 65%, var(--pinkie-pink));
+  --radius: 18px;
+  --shadow: 0 10px 30px rgba(32, 56, 217, .10);
+}
+
+* { box-sizing: border-box; margin: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: "Manrope", "Segoe UI", system-ui, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.55;
+}
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 3px solid var(--snow-aqua); outline-offset: 2px; }
+
+/* ---------- Каркас: сайдбар слева + контент справа ---------- */
+.app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+.sidebar {
+  background: var(--snow-night); color: var(--snow-white);
+  padding: 24px 16px; position: sticky; top: 0; height: 100vh;
+  display: flex; flex-direction: column; gap: 28px;
+}
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 10px; font-weight: 800; font-size: 20px; }
+.brand-mark { width: 30px; height: 30px; border-radius: 9px; background: var(--grad); }
+.nav { display: flex; flex-direction: column; gap: 6px; }
+.nav-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 14px; border-radius: 12px; font-weight: 600; font-size: 15px;
+  color: var(--snow-sky);
+}
+a.nav-item:hover { background: rgba(168, 223, 255, .12); color: var(--snow-white); }
+.nav-item.active { background: var(--grad); color: #FFFFFF; }
+.nav-item.soon { opacity: .6; cursor: default; }
+.nav-soon-tag { font-size: 11px; font-weight: 600; border: 1px solid var(--snow-sky); border-radius: 999px; padding: 1px 8px; }
+.sidebar-foot { margin-top: auto; padding: 0 10px; font-size: 13px; color: var(--snow-sky); }
+
+.content { min-width: 0; }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 18px 36px; background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.topbar h1 { font-size: 22px; color: var(--heading); }
+.topbar-user { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+.page { padding: 32px 36px 56px; }
+
+/* ---------- Кнопки: заливка только у главного действия ---------- */
+.btn {
+  display: inline-block; padding: 9px 20px; border-radius: 999px; cursor: pointer;
+  font: inherit; font-weight: 700; font-size: 14px;
+  border: 1.5px solid var(--primary); background: var(--surface); color: var(--primary);
+}
+.btn:hover { background: var(--surface-soft); }
+.btn-main { background: var(--primary); color: #FFFFFF; }
+.btn-main:hover { background: var(--snow-deep); }
+.btn-big { padding: 13px 28px; font-size: 16px; }
+
+/* ---------- Карточки и таблицы ---------- */
+.card { background: var(--surface); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+.section-title { margin: 36px 0 12px; font-size: 20px; color: var(--heading); }
+.table-wrap { overflow-x: auto; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); }
+table.table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.table th { text-align: left; padding: 14px 16px; color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: .04em; background: var(--surface-soft); }
+.table td { padding: 14px 16px; border-top: 1px solid var(--line); vertical-align: middle; }
+
+/* ---------- Формы ---------- */
+input[type="text"], select {
+  font: inherit; padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 10px;
+  background: var(--surface); color: var(--text);
+}
+input[type="text"]:focus, select:focus { border-color: var(--primary); }
+
+/* ---------- Статусы (единственное место для зелёного, жёлтого, красного) ---------- */
+.chip {
+  display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+  font-style: normal; font-size: 13px; font-weight: 700; color: var(--text);
+  padding: 5px 12px; border-radius: 999px;
+}
+.chip::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.chip.ok   { background: color-mix(in srgb, var(--status-ok) 25%, white); }
+.chip.warn { background: color-mix(in srgb, var(--status-warn) 25%, white); }
+.chip.bad  { background: color-mix(in srgb, var(--status-bad) 20%, white); }
+.chip.ok::before   { background: var(--status-ok); }
+.chip.warn::before { background: var(--status-warn); }
+.chip.bad::before  { background: var(--status-bad); }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .nav { flex-direction: row; flex-wrap: wrap; }
+  .sidebar-foot { display: none; }
+  .page { padding: 24px 18px 40px; }
+}

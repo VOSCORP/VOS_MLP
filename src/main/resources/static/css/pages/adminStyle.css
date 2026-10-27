@@ -1,0 +1,3 @@
+/* adminStyle.css — страница администратора */
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.actions form { display: inline; }

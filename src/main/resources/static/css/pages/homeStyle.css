@@ -1,0 +1,19 @@
+/* homeStyle.css — только главная страница */
+.hero {
+  border-radius: 28px; padding: 48px; color: #FFFFFF;
+  background: linear-gradient(115deg, var(--snow-night), var(--snow-deep) 45%, var(--twilight-violet) 85%, var(--pinkie-pink));
+  box-shadow: var(--shadow);
+}
+.hero h2 { font-size: clamp(30px, 4vw, 48px); line-height: 1.15; max-width: 18ch; }
+.hero p { margin: 16px 0 26px; max-width: 56ch; color: var(--snow-white); font-size: 17px; }
+.hero .btn-main { background: #FFFFFF; color: var(--snow-deep); border-color: #FFFFFF; }
+.hero .btn-main:hover { background: var(--snow-sky); }
+
+.module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; margin-top: 28px; }
+.module { display: block; border-top: 4px solid var(--snow-royal); }
+.module:nth-child(2) { border-top-color: var(--twilight-violet); }
+.module:nth-child(3) { border-top-color: var(--pinkie-pink); }
+.module:nth-child(4) { border-top-color: var(--snow-aqua); }
+.module h3 { color: var(--heading); margin-bottom: 6px; }
+.module p { color: var(--text-muted); font-size: 15px; }
+.module.soon { opacity: .7; }

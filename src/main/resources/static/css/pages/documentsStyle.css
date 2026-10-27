@@ -1,0 +1,6 @@
+/* documentsStyle.css — страница документов студента */
+.absence-card { margin-bottom: 16px; }
+.absence-card .meta { color: var(--text-muted); font-size: 14px; }
+.absence-card .title { font-weight: 800; color: var(--heading); }
+.apply-form { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.apply-form input[type="text"] { flex: 1 1 240px; }

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Посещаемость', 'attendanceStyle.css')}"></head>
+<body>
+<div class="app">
+  <aside th:replace="~{layout/layout :: sidebar('attendance')}"></aside>
+  <div class="content">
+    <header th:replace="~{layout/layout :: topbar('Посещаемость занятий')}"></header>
+    <main class="page">
+      <p class="attendance-note">Отсутствие без подтверждённой причины получает статус «Без причины». После одобрения справки статус меняется.</p>
+      <div class="table-wrap">
+        <table class="table">
+          <tr><th>Студент</th><th>Группа</th><th>Предмет</th><th>Дата</th><th>Статус</th></tr>
+          <tr th:each="item : ${items}">
+            <td th:text="${item.student.fullName}"></td>
+            <td th:text="${item.student.groupName}"></td>
+            <td th:text="${item.subject}"></td>
+            <td th:text="${item.lessonDate}"></td>
+            <td>
+              <span class="chip"
+                    th:classappend="${item.status.name() == 'EXCUSED'} ? 'ok' : 'bad'"
+                    th:text="${item.status.name() == 'EXCUSED'} ? 'Уважительная причина' : 'Без причины'"></span>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

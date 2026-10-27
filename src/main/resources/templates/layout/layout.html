@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Общий <head>: подключает generalStyle.css и стиль конкретной страницы -->
+<head th:fragment="head(title, pageCss)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${title} + ' — VOS College'">VOS College</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/generalStyle.css}">
+  <link rel="stylesheet" th:href="@{'/css/pages/' + ${pageCss}}">
+</head>
+
+<body>
+
+<!-- Общий сайдбар: меняется в одном месте для всех страниц -->
+<aside class="sidebar" th:fragment="sidebar(active)">
+  <div class="brand"><span class="brand-mark"></span>VOS College</div>
+  <nav class="nav">
+    <a class="nav-item" th:classappend="${active == 'home'} ? 'active'" th:href="@{/}">Главная</a>
+    <a class="nav-item" th:classappend="${active == 'attendance'} ? 'active'" th:href="@{/teacher}">Посещаемость</a>
+    <a class="nav-item" th:classappend="${active == 'documents'} ? 'active'" th:href="@{/student}">Документы</a>
+    <a class="nav-item" th:classappend="${active == 'admin'} ? 'active'" th:href="@{/admin}">Администрирование</a>
+    <span class="nav-item soon">Расписание <span class="nav-soon-tag">скоро</span></span>
+    <a class="nav-item" th:classappend="${active == 'grades'} ? 'active'" th:href="@{/grades}">Оценки</a>
+  </nav>
+  <div class="sidebar-foot">Учебный проект · Spring Boot</div>
+</aside>
+
+<!-- Общая верхняя панель -->
+<header class="topbar" th:fragment="topbar(title)">
+  <h1 th:text="${title}">Страница</h1>
+  <span class="topbar-user">Демо-режим</span>
+</header>
+
+</body>
+</html>

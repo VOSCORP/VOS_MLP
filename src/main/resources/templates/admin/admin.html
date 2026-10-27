@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Администрирование', 'adminStyle.css')}"></head>
+<body>
+<div class="app">
+  <aside th:replace="~{layout/layout :: sidebar('admin')}"></aside>
+  <div class="content">
+    <header th:replace="~{layout/layout :: topbar('Заявления студентов')}"></header>
+    <main class="page">
+
+      <div class="table-wrap">
+        <table class="table">
+          <tr><th>Студент</th><th>Предмет</th><th>Причина</th><th>Документ</th><th>Medical API</th><th>Статус</th><th>Действия</th></tr>
+          <tr th:each="app : ${applications}">
+            <td th:text="${app.attendance.student.fullName}"></td>
+            <td th:text="${app.attendance.subject}"></td>
+            <td th:text="${app.reason}"></td>
+            <td th:text="${app.documentType}"></td>
+            <td>
+              <span th:if="${app.medicalResult == null}" class="chip warn">Не проверено</span>
+              <span th:if="${app.medicalResult != null}" class="chip"
+                    th:classappend="${app.medicalResult.name() == 'VALID'} ? 'ok' : (${app.medicalResult.name() == 'NOT_FOUND'} ? 'bad' : 'warn')"
+                    th:text="${app.medicalResult.name()}"></span>
+            </td>
+            <td>
+              <span class="chip"
+                    th:classappend="${app.status.name() == 'APPROVED'} ? 'ok' : (${app.status.name() == 'REJECTED'} ? 'bad' : 'warn')"
+                    th:text="${app.status.name() == 'APPROVED'} ? 'Одобрено' : (${app.status.name() == 'REJECTED'} ? 'Отклонено' : 'На рассмотрении')"></span>
+            </td>
+            <td>
+              <div class="actions">
+                <form th:if="${app.status.name() == 'PENDING' and app.medicalResult == null}"
+                      th:action="@{/admin/{id}/verify(id=${app.id})}" method="post">
+                  <button class="btn" type="submit">Проверить</button>
+                </form>
+                <form th:if="${app.status.name() == 'PENDING' and app.medicalResult != null and app.medicalResult.name() == 'VALID'}"
+                      th:action="@{/admin/{id}/approve(id=${app.id})}" method="post">
+                  <button class="btn btn-main" type="submit">Одобрить</button>
+                </form>
+                <form th:if="${app.status.name() == 'PENDING'}"
+                      th:action="@{/admin/{id}/reject(id=${app.id})}" method="post">
+                  <button class="btn" type="submit">Отклонить</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <h2 class="section-title">Дисциплинарные замечания</h2>
+      <div class="table-wrap">
+        <table class="table">
+          <tr><th>Студент</th><th>Основание</th><th>Дата</th><th>Статус</th></tr>
+          <tr th:each="n : ${notices}">
+            <td th:text="${n.student.fullName}"></td>
+            <td th:text="${n.reason}"></td>
+            <td th:text="${n.createdAt}"></td>
+            <td><span class="chip warn" th:text="${n.status.name()}"></span></td>
+          </tr>
+        </table>
+      </div>
+
+      <h2 class="section-title">Предложения об отчислении</h2>
+      <div class="table-wrap">
+        <table class="table">
+          <tr><th>Студент</th><th>Группа</th><th>Замечаний</th><th>Предложение</th><th>Студент</th><th>Действия</th></tr>
+          <tr th:each="p : ${proposals}">
+            <td th:text="${p.student.fullName}"></td>
+            <td th:text="${p.student.groupName}"></td>
+            <td th:text="${p.noticeCount}"></td>
+            <td>
+              <span class="chip"
+                    th:classappend="${p.status.name() == 'CONFIRMED'} ? 'bad' : (${p.status.name() == 'REJECTED'} ? 'ok' : 'warn')"
+                    th:text="${p.status.name() == 'CONFIRMED'} ? 'Подтверждено' : (${p.status.name() == 'REJECTED'} ? 'Отклонено' : 'Ждёт решения')"></span>
+            </td>
+            <td th:text="${p.student.status.name() == 'EXPELLED'} ? 'Отчислен' : 'Учится'"></td>
+            <td>
+              <div class="actions">
+                <form th:if="${p.status.name() == 'PENDING_ADMIN_APPROVAL'}"
+                      th:action="@{/admin/proposals/{id}/confirm(id=${p.id})}" method="post">
+                  <button class="btn btn-main" type="submit">Подтвердить отчисление</button>
+                </form>
+                <form th:if="${p.status.name() == 'PENDING_ADMIN_APPROVAL'}"
+                      th:action="@{/admin/proposals/{id}/reject(id=${p.id})}" method="post">
+                  <button class="btn" type="submit">Отклонить</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

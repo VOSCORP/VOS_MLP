@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Документы', 'documentsStyle.css')}"></head>
+<body>
+<div class="app">
+  <aside th:replace="~{layout/layout :: sidebar('documents')}"></aside>
+  <div class="content">
+    <header th:replace="~{layout/layout :: topbar('Документы студента')}"></header>
+    <main class="page">
+
+      <h2 class="section-title" style="margin-top:0;">Мои отсутствия</h2>
+      <div class="card absence-card" th:each="a : ${absences}">
+        <p><span class="title" th:text="${a.student.fullName}"></span>
+           <span class="meta"> · <span th:text="${a.subject}"></span> · <span th:text="${a.lessonDate}"></span></span></p>
+        <form class="apply-form" th:action="@{/student/apply}" method="post">
+          <input type="hidden" name="attendanceId" th:value="${a.id}">
+          <input type="text" name="reason" placeholder="Причина отсутствия" required>
+          <select name="documentType">
+            <option>Медицинская справка</option>
+            <option>Другой документ</option>
+          </select>
+          <button class="btn btn-main" type="submit">Отправить заявление</button>
+        </form>
+      </div>
+
+      <h2 class="section-title">Мои заявления</h2>
+      <div class="table-wrap">
+        <table class="table">
+          <tr><th>Предмет</th><th>Причина</th><th>Документ</th><th>Статус</th></tr>
+          <tr th:each="app : ${applications}">
+            <td th:text="${app.attendance.subject}"></td>
+            <td th:text="${app.reason}"></td>
+            <td th:text="${app.documentType}"></td>
+            <td>
+              <span class="chip"
+                    th:classappend="${app.status.name() == 'APPROVED'} ? 'ok' : (${app.status.name() == 'REJECTED'} ? 'bad' : 'warn')"
+                    th:text="${app.status.name() == 'APPROVED'} ? 'Одобрено' : (${app.status.name() == 'REJECTED'} ? 'Отклонено' : 'На рассмотрении')"></span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

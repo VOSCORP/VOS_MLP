@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Главная', 'homeStyle.css')}"></head>
+<body>
+<div class="app">
+  <aside th:replace="~{layout/layout :: sidebar('home')}"></aside>
+  <div class="content">
+    <header th:replace="~{layout/layout :: topbar('Главная')}"></header>
+    <main class="page">
+
+      <section class="hero">
+        <h2>Система колледжа — всё в одном месте</h2>
+        <p>Посещаемость, документы, оценки и расписание. Студент подаёт справку онлайн, администратор проверяет её и принимает решение.</p>
+        <a class="btn btn-main btn-big" th:href="@{/student}">Подать заявление</a>
+      </section>
+
+      <section class="module-grid">
+        <a class="card module" th:href="@{/teacher}">
+          <h3>Посещаемость</h3>
+          <p>Преподаватель отмечает отсутствия, статусы видны сразу.</p>
+        </a>
+        <a class="card module" th:href="@{/student}">
+          <h3>Документы</h3>
+          <p>Заявления и справки студента с понятным статусом рассмотрения.</p>
+        </a>
+        <a class="card module" th:href="@{/admin}">
+          <h3>Администрирование</h3>
+          <p>Проверка документов, замечания и предложения об отчислении.</p>
+        </a>
+        <div class="card module soon">
+          <h3>Расписание и оценки</h3>
+          <p>Следующие модули проекта: в разработке.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

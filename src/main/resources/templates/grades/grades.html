@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Оценки', 'gradesStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar('grades')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Электронный журнал')}"></header>
+        <main class="page">
+
+            <div class="error-box" th:if="${error}" th:text="${error}"></div>
+
+            <div class="card">
+                <form class="grade-form" th:action="@{/grades/add}" method="post">
+                    <select name="studentId">
+                        <option th:each="s : ${students}" th:value="${s.id}" th:text="${s.fullName}"></option>
+                    </select>
+                    <input type="text" name="subject" placeholder="Предмет" required>
+                    <select name="gradeType">
+                        <option>Текущая</option>
+                        <option>Рубежный контроль</option>
+                        <option>Зачётная неделя</option>
+                        <option>Практика</option>
+                    </select>
+                    <input type="number" name="score" placeholder="Балл 0–100" required>
+                    <button class="btn btn-main" type="submit">Поставить оценку</button>
+                </form>
+            </div>
+
+            <h2 class="section-title">Средний балл и стипендия (предварительно)</h2>
+            <div class="table-wrap">
+                <table class="table">
+                    <tr><th>Студент</th><th>Группа</th><th>Средний балл по предметам</th><th>Повышенная стипендия</th></tr>
+                    <tr th:each="row : ${summary}">
+                        <td th:text="${row.name}"></td>
+                        <td th:text="${row.groupName}"></td>
+                        <td th:text="${row.averages}"></td>
+                        <td>
+              <span class="chip"
+                    th:classappend="${row.scholarship == 'YES'} ? 'ok' : (${row.scholarship == 'NO'} ? 'bad' : 'warn')"
+                    th:text="${row.scholarship == 'YES'} ? 'Соответствует' : (${row.scholarship == 'NO'} ? 'Не соответствует' : 'Данных недостаточно')"></span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <h2 class="section-title">Все оценки</h2>
+            <div class="table-wrap">
+                <table class="table">
+                    <tr><th>Студент</th><th>Предмет</th><th>Вид</th><th>Балл</th><th>Дата</th></tr>
+                    <tr th:each="g : ${grades}">
+                        <td th:text="${g.student.fullName}"></td>
+                        <td th:text="${g.subject}"></td>
+                        <td th:text="${g.gradeType}"></td>
+                        <td th:text="${g.score}"></td>
+                        <td th:text="${g.gradeDate}"></td>
+                    </tr>
+                </table>
+            </div>
+
+        </main>
+    </div>
+</div>
+</body>
+</html>
