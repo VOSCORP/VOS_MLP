@@ -42,4 +42,9 @@ public class JournalEntry {
     public CellStatus getStatus() { return status; }
     public Integer getLateMinutes() { return lateMinutes; }
     public boolean isExcused() { return excused; }
+
+    public void setScore(Integer score) { this.score = score; }
+    public void setStatus(CellStatus status) { this.status = status; }
+    public void setLateMinutes(Integer lateMinutes) { this.lateMinutes = lateMinutes; }
+    public void setExcused(boolean excused) { this.excused = excused; }
 }

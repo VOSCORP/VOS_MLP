@@ -23,7 +23,9 @@
                     <button class="btn btn-main" type="submit">Показать</button>
                 </form>
 
-                <div class="journal-scroll">
+                <p class="journal-help">Двойной клик по ячейке: ввести оценку. Один клик: открыть панель (опоздание, пропуск, отработка).</p>
+
+                <div class="journal-scroll" th:attr="data-url=@{/journal/cell}">
                     <table class="journal">
                         <thead>
                         <tr>
@@ -40,11 +42,12 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="row, st : ${rows}">
+                        <tr th:each="row, st : ${rows}" th:attr="data-name=${row.name}">
                             <td class="col-num" th:text="${st.count}"></td>
                             <td class="col-name" th:text="${row.name}"></td>
                             <td th:each="cell : ${row.cells}" th:class="${'cell ' + cell.css}"
-                                th:text="${cell.text}" th:title="${cell.title}"></td>
+                                th:text="${cell.text}" th:title="${cell.title}"
+                                th:attr="data-student=${cell.studentId},data-column=${cell.columnId},data-status=${cell.status},data-score=${cell.score},data-minutes=${cell.lateMinutes},data-excused=${cell.excused}"></td>
                             <td class="col-avg" th:text="${row.average}"></td>
                         </tr>
                         </tbody>
@@ -61,5 +64,38 @@
         </main>
     </div>
 </div>
+
+<!-- Правая панель с подробностями ячейки -->
+<aside id="cellPanel" class="cell-panel" aria-label="Подробности ячейки">
+    <h3 id="panelWho">Студент</h3>
+    <p class="sub" id="panelWhat">Занятие</p>
+
+    <label class="panel-field">Статус
+        <select id="fStatus">
+            <option value="NORMAL">Обычная оценка</option>
+            <option value="LATE">Опоздал</option>
+            <option value="ABSENT">Не пришёл</option>
+            <option value="MAKEUP">Отработка</option>
+        </select>
+    </label>
+    <label class="panel-field">Оценка (0–100)
+        <input type="number" id="fScore" min="0" max="100">
+    </label>
+    <label class="panel-field" id="boxMinutes" hidden>Опоздал на (минут)
+        <input type="number" id="fMinutes" min="1">
+    </label>
+    <label class="panel-field panel-check" id="boxExcused" hidden>
+        <input type="checkbox" id="fExcused"> Пропуск с уважительной причиной
+    </label>
+    <p class="panel-hint" id="panelHint" hidden>Отработка: максимум 80 баллов. Больше можно получить, выполнив дополнительное задание преподавателя.</p>
+
+    <div class="panel-actions">
+        <button class="btn btn-main" type="button" id="btnSave">Сохранить</button>
+        <button class="btn" type="button" id="btnClose">Закрыть</button>
+    </div>
+    <p class="panel-msg" id="panelMsg"></p>
+</aside>
+
+<script th:src="@{/js/journal.js}"></script>
 </body>
 </html>
