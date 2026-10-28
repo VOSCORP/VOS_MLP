@@ -8,11 +8,13 @@ import com.voscorp.vosmlp.grades.GradeRepository;
 import com.voscorp.vosmlp.students.Student;
 import com.voscorp.vosmlp.students.StudentRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
 @Component
+@Order(1)
 public class DataLoader implements CommandLineRunner {
     private final StudentRepository students;
     private final AttendanceRepository attendances;
@@ -26,6 +28,7 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        if (students.count() > 0) { return; }
         Student a = students.save(new Student("Иванов Алихан", "24-ИТ-1"));
         Student b = students.save(new Student("Петрова Айгерим", "24-ИТ-1"));
         Student c = students.save(new Student("Смагулов Данияр", "24-ИТ-2"));

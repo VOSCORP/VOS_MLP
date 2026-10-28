@@ -1,5 +1,6 @@
 package com.voscorp.vosmlp.students;
 
+import com.voscorp.vosmlp.journal.StudyGroup;
 import jakarta.persistence.*;
 
 @Entity
@@ -26,4 +27,13 @@ public class Student {
     public String getGroupName() { return groupName; }
     public StudentStatus getStatus() { return status; }
     public void setStatus(StudentStatus status) { this.status = status; }
+
+    @ManyToOne
+    private StudyGroup studyGroup;
+
+    public StudyGroup getStudyGroup() { return studyGroup; }
+    public void setStudyGroup(StudyGroup group) {
+        this.studyGroup = group;
+        this.groupName = group.getName();
+    }
 }

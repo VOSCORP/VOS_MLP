@@ -1,0 +1,36 @@
+/* journalStyle.css — электронный журнал */
+:root {
+    /* цвета статусов ячеек (из палитры Рейнбоу Дэш) */
+    --cell-late: #F7E85A;     /* опоздание */
+    --cell-absent: #E8403C;   /* пропуск */
+    --cell-makeup: #F5A03A;   /* отработка */
+}
+
+.journal-filter { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+
+.journal-scroll {
+    overflow-x: auto; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+table.journal { border-collapse: separate; border-spacing: 0; min-width: 100%; font-size: 14px; }
+.journal th, .journal td { padding: 10px 12px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); text-align: center; white-space: nowrap; }
+.journal thead th { background: var(--surface-soft); color: var(--heading); position: sticky; top: 0; }
+.journal th.special { background: var(--snow-sky); }
+
+/* первые два столбца и «Средний» всегда на виду при горизонтальной прокрутке */
+.journal .col-num { position: sticky; left: 0; z-index: 2; background: var(--surface); width: 44px; min-width: 44px; }
+.journal .col-name { position: sticky; left: 44px; z-index: 2; background: var(--surface); text-align: left; min-width: 220px; font-weight: 700; }
+.journal thead .col-num, .journal thead .col-name { background: var(--surface-soft); z-index: 3; }
+.journal .col-avg { position: sticky; right: 0; z-index: 2; background: var(--surface); font-weight: 800; color: var(--heading); }
+
+.journal .task-row td { background: var(--surface-soft); color: var(--text-muted); font-size: 12px; font-style: italic; }
+
+.cell.normal { background: #FFFFFF; }
+.cell.late   { background: var(--cell-late); font-weight: 700; }
+.cell.absent { background: var(--cell-absent); font-weight: 800; }
+.cell.makeup { background: var(--cell-makeup); font-weight: 700; }
+
+.journal-legend { margin-top: 14px; display: flex; gap: 12px; flex-wrap: wrap; font-size: 13px; }
+.legend { padding: 4px 12px; border-radius: 999px; font-weight: 700; }
+.legend.late { background: var(--cell-late); }
+.legend.absent { background: var(--cell-absent); }
+.legend.makeup { background: var(--cell-makeup); }

@@ -20,6 +20,7 @@
   <nav class="nav">
     <a class="nav-item" th:classappend="${active == 'home'} ? 'active'" th:href="@{/}">Главная</a>
     <a class="nav-item" th:classappend="${active == 'attendance'} ? 'active'" th:href="@{/teacher}">Посещаемость</a>
+    <a class="nav-item" th:classappend="${active == 'journal'} ? 'active'" th:href="@{/journal}">Журнал</a>
     <a class="nav-item" th:classappend="${active == 'documents'} ? 'active'" th:href="@{/student}">Документы</a>
     <a class="nav-item" th:classappend="${active == 'admin'} ? 'active'" th:href="@{/admin}">Администрирование</a>
     <span class="nav-item soon">Расписание <span class="nav-soon-tag">скоро</span></span>
