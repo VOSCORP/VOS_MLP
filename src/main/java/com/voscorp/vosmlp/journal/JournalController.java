@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -20,15 +21,17 @@ public class JournalController {
     private final JournalColumnRepository columns;
     private final JournalEntryRepository entries;
     private final StudentRepository students;
+    private final JournalCalc calc;
 
     public JournalController(StudyGroupRepository groups, SubjectRepository subjects,
                              JournalColumnRepository columns, JournalEntryRepository entries,
-                             StudentRepository students) {
+                             StudentRepository students, JournalCalc calc) {
         this.groups = groups;
         this.subjects = subjects;
         this.columns = columns;
         this.entries = entries;
         this.students = students;
+        this.calc = calc;
     }
 
     @GetMapping("/journal")
@@ -81,7 +84,9 @@ public class JournalController {
                 cells.add(new CellView(s.getId(), c.getId(), e));
                 if (e != null) { studentEntries.add(e); }
             }
-            rows.add(new JournalRow(s.getId(), s.getFullName(), cells, averageOf(studentEntries)));
+            ScholarshipResult sr = calc.scholarship(s);
+            rows.add(new JournalRow(s.getId(), s.getFullName(), cells, averageOf(studentEntries),
+                    calc.finalScore(studentEntries, cols.size()), "YES".equals(sr.getStatus())));
         }
 
         model.addAttribute("groups", allGroups);
@@ -153,7 +158,9 @@ public class JournalController {
 
         List<JournalColumn> cols = columns.findByStudyGroupAndSubjectOrderByColumnDateAsc(
                 column.getStudyGroup(), column.getSubject());
-        String average = averageOf(entries.findByStudentAndJournalColumnIn(student, cols));
+        List<JournalEntry> studentEntries = entries.findByStudentAndJournalColumnIn(student, cols);
+        String average = averageOf(studentEntries);
+        String finalScore = calc.finalScore(studentEntries, cols.size());
 
         CellView cell = new CellView(studentId, columnId, saved);
         Map<String, Object> body = new LinkedHashMap<>();
@@ -166,6 +173,7 @@ public class JournalController {
         body.put("lateMinutes", cell.getLateMinutes());
         body.put("excused", cell.isExcused());
         body.put("average", average);
+        body.put("finalScore", finalScore);
         return ResponseEntity.ok(body);
     }
 
@@ -186,5 +194,29 @@ public class JournalController {
         }
         if (scores.isEmpty()) { return "—"; }
         return String.format("%.2f", scores.stream().mapToInt(Integer::intValue).average().orElse(0));
+    }
+
+    // Данные для панели «достоин повышенной стипендии» (вызывается из JavaScript)
+    @GetMapping("/journal/student/{id}/scholarship")
+    @ResponseBody
+    public Map<String, Object> scholarship(@PathVariable Long id) {
+        Student student = students.findById(id).orElseThrow();
+        ScholarshipResult result = calc.scholarship(student);
+
+        List<Map<String, Object>> subjectList = new ArrayList<>();
+        for (ScholarshipResult.Line line : result.getLines()) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("subject", line.getSubject());
+            m.put("average", line.getAverage());
+            m.put("count", line.getCount());
+            m.put("need", line.getNeed());
+            m.put("ok", line.isOk());
+            subjectList.add(m);
+        }
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("name", student.getFullName());
+        body.put("status", result.getStatus());
+        body.put("subjects", subjectList);
+        return body;
     }
 }

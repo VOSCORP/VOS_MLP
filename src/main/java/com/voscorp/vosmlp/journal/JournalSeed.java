@@ -64,15 +64,18 @@ public class JournalSeed implements CommandLineRunner {
         }
         mathCols.add(columns.save(new JournalColumn(group, math, LocalDate.of(2026, 10, 20), ColumnType.RK1, "Рубежный контроль 1")));
 
-        fill(list, progCols);
-        fill(list, mathCols);
+        fill(list, progCols, 0);
+        fill(list, mathCols, 1);
     }
 
-    private void fill(List<Student> list, List<JournalColumn> cols) {
+    private void fill(List<Student> list, List<JournalColumn> cols, int subjectNo) {
         for (int c = 0; c < cols.size(); c++) {
             for (int s = 0; s < list.size(); s++) {
-                if ((s + c) % 9 == 0) { continue; } // пустая ячейка
                 int score = 70 + ((s * 7 + c * 13) % 31);
+                if (s == 5) { score = 92 + (c * 3) % 9; }                       // сильный студент по всем предметам
+                if (s == 6) { score = subjectNo == 0 ? 94 : 85 + (c % 3); }     // почти: по математике 85–87
+                if ((s + c) % 9 == 0 && s != 5 && s != 6) { continue; }         // пустая ячейка
+
                 JournalEntry entry;
                 if (s == 2 && c == 1) {
                     entry = new JournalEntry(list.get(s), cols.get(c), 85, CellStatus.LATE, 10, false);
