@@ -129,3 +129,5 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
   .sidebar-foot { display: none; }
   .page { padding: 24px 18px 40px; }
 }
+
+.topbar-right { display: flex; align-items: center; gap: 14px; }

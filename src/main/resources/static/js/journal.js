@@ -124,6 +124,14 @@
     refreshBadge(row);
   }
 
+  function csrfHeaders() {
+    var h = { 'Content-Type': 'application/x-www-form-urlencoded' };
+    var token = document.querySelector('meta[name="_csrf"]');
+    var name = document.querySelector('meta[name="_csrf_header"]');
+    if (token && name) { h[name.content] = token.content; }
+    return h;
+  }
+
   async function send(td, data) {
     var params = new URLSearchParams({ studentId: td.dataset.student, columnId: td.dataset.column });
     Object.keys(data).forEach(function (k) { params.append(k, data[k]); });
@@ -131,7 +139,7 @@
     try {
       var res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: csrfHeaders(),
         body: params
       });
       json = await res.json();

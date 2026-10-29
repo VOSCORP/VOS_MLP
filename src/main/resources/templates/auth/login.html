@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Вход', 'loginStyle.css')}"></head>
+<body class="login-body">
+<main class="login-card card">
+    <div class="brand login-brand"><span class="brand-mark"></span>VOS College</div>
+    <h1>Вход в систему</h1>
+
+    <p class="login-msg bad" th:if="${param.error}">Неверный логин или пароль</p>
+    <p class="login-msg ok" th:if="${param.logout}">Вы вышли из системы</p>
+
+    <form th:action="@{/login}" method="post" class="login-form">
+        <label>Логин <input type="text" name="username" required autofocus></label>
+        <label>Пароль <input type="password" name="password" required></label>
+        <button class="btn btn-main btn-big" type="submit">Войти</button>
+    </form>
+
+    <div class="demo-box">
+        <b>Демо-аккаунты (пароль у всех demo123)</b>
+        <ul>
+            <li><code>admin</code>: администратор</li>
+            <li><code>teacher1</code>: преподаватель</li>
+            <li><code>student1</code>: студент</li>
+            <li><code>parent1</code>: родитель</li>
+            <li><code>starosta1</code>: староста</li>
+        </ul>
+    </div>
+</main>
+</body>
+</html>

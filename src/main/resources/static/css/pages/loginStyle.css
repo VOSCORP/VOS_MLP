@@ -1,0 +1,15 @@
+/* loginStyle.css — страница входа */
+.login-body { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.login-card { width: min(440px, 100%); }
+.login-brand { padding: 0; margin-bottom: 18px; color: var(--heading); }
+.login-card h1 { color: var(--heading); font-size: 24px; margin-bottom: 16px; }
+.login-form { display: flex; flex-direction: column; gap: 14px; }
+.login-form label { display: flex; flex-direction: column; gap: 6px; font-weight: 700; font-size: 14px; }
+.login-form input[type="text"], .login-form input[type="password"] {
+  font: inherit; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 10px;
+}
+.login-msg { padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; font-weight: 700; }
+.login-msg.bad { background: color-mix(in srgb, var(--status-bad) 20%, white); }
+.login-msg.ok { background: color-mix(in srgb, var(--status-ok) 25%, white); }
+.demo-box { margin-top: 22px; padding: 14px 16px; border-radius: 12px; background: var(--surface-soft); font-size: 14px; }
+.demo-box ul { margin: 8px 0 0 18px; }
