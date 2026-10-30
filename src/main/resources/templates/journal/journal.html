@@ -23,10 +23,12 @@
                     <button class="btn btn-main" type="submit">Показать</button>
                 </form>
 
-                <p class="journal-help">Двойной клик по ячейке: ввести оценку. Один клик: панель ячейки. Клик по фамилии: стипендия.
+                <p class="journal-help" th:if="${editable}">Двойной клик по ячейке: ввести оценку. Один клик: панель ячейки. Клик по фамилии: стипендия.
+                    Итоговый = средний × (0,9 + 0,1 × посещаемость).</p>
+                <p class="journal-help" th:unless="${editable}">Режим просмотра. Клик по фамилии: стипендия.
                     Итоговый = средний × (0,9 + 0,1 × посещаемость).</p>
 
-                <div class="journal-scroll" th:attr="data-url=@{/journal/cell},data-sch-url=@{/journal/student/}">
+                <div class="journal-scroll" th:attr="data-url=@{/journal/cell},data-sch-url=@{/journal/student/},data-editable=${editable}">
                     <table class="journal">
                         <thead>
                         <tr>

@@ -4,6 +4,7 @@
   if (!scroll) { return; }
   var url = scroll.dataset.url;
   var schUrl = scroll.dataset.schUrl;
+  var editable = scroll.dataset.editable === 'true';
   var panel = document.getElementById('cellPanel');
   var f = {
     who: document.getElementById('panelWho'),
@@ -215,6 +216,7 @@
     closeCellPanel();
     sp.name.textContent = data.name;
     sp.status.textContent = STATUS_TEXT[data.status] || '';
+    if (data.restricted) { sp.status.textContent += ' Подробности по предметам видит куратор группы.'; }
     sp.list.textContent = '';
     data.subjects.forEach(function (s) {
       var box = document.createElement('div');
@@ -237,12 +239,12 @@
     var name = e.target.closest('td.student-link');
     if (name) { openStudentPanel(name); return; }
     var td = e.target.closest('td.cell');
-    if (!td || td.querySelector('input')) { return; }
+        if (!td || !editable || td.querySelector('input')) { return; }
     selectCell(td);
   });
   scroll.addEventListener('dblclick', function (e) {
     var td = e.target.closest('td.cell');
-    if (td) { editInline(td); }
+        if (td && editable) { editInline(td); }
   });
 
   f.status.addEventListener('change', syncFields);

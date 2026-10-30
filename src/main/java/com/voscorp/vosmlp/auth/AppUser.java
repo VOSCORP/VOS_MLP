@@ -1,5 +1,6 @@
 package com.voscorp.vosmlp.auth;
 
+import com.voscorp.vosmlp.students.Student;
 import jakarta.persistence.*;
 
 @Entity
@@ -33,4 +34,11 @@ public class AppUser {
     public String getPasswordHash() { return passwordHash; }
     public String getFullName() { return fullName; }
     public UserRole getRole() { return role; }
+
+    // для студента и старосты это он сам, для родителя это его ребёнок
+    @ManyToOne
+    private Student linkedStudent;
+
+    public Student getLinkedStudent() { return linkedStudent; }
+    public void setLinkedStudent(Student linkedStudent) { this.linkedStudent = linkedStudent; }
 }
