@@ -131,3 +131,20 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
 }
 
 .topbar-right { display: flex; align-items: center; gap: 14px; }
+
+
+/* ---- уведомления: колокольчик и toast ---- */
+.bell { position: relative; display: inline-flex; padding: 8px; border-radius: 50%; color: var(--heading); }
+.bell:hover { background: var(--surface-soft); }
+.bell-count {
+  position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 999px; background: var(--primary); color: #FFFFFF;
+  font-size: 11px; font-weight: 800; line-height: 18px; text-align: center;
+}
+.notice-stack { position: fixed; right: 24px; bottom: 24px; z-index: 40; display: flex; flex-direction: column; gap: 10px; max-width: min(380px, calc(100vw - 48px)); }
+.notice-toast {
+  display: flex; flex-direction: column; gap: 6px; padding: 14px 18px; border-radius: 14px;
+  background: var(--snow-night); color: var(--snow-white); font-weight: 600; font-size: 14px;
+  box-shadow: 0 12px 30px rgba(11, 30, 59, .35);
+}
+.notice-toast a { color: var(--snow-sky); font-weight: 800; }

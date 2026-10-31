@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Уведомления', 'notificationsStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar('notifications')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Уведомления')}"></header>
+        <main class="page">
+
+            <form class="notif-actions" th:action="@{/notifications/read-all}" method="post">
+                <button class="btn" type="submit">Прочитать все</button>
+            </form>
+
+            <p class="notif-empty" th:if="${#lists.isEmpty(items)}">Уведомлений пока нет.</p>
+
+            <ul class="notif-list">
+                <li class="card notif-item" th:each="n : ${items}" th:classappend="${!n.seen} ? 'unread'">
+                    <div>
+                        <p th:text="${n.text}"></p>
+                        <span class="notif-time" th:text="${n.createdAtText}"></span>
+                    </div>
+                    <a class="btn" th:if="${n.link != null and n.link != ''}" th:href="@{${n.link}}">Открыть</a>
+                </li>
+            </ul>
+
+        </main>
+    </div>
+</div>
+</body>
+</html>

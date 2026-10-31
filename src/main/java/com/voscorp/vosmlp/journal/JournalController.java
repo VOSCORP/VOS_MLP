@@ -25,11 +25,12 @@ public class JournalController {
     private final AppUserRepository users;
     private final JournalAccess access;
     private final DashboardService dashboards;
+    private final JournalNotifier notifier;
 
     public JournalController(SubjectRepository subjects, JournalColumnRepository columns,
                              JournalEntryRepository entries, StudentRepository students,
                              JournalCalc calc, AppUserRepository users, JournalAccess access,
-                             DashboardService dashboards) {
+                             DashboardService dashboards, JournalNotifier notifier) {
         this.subjects = subjects;
         this.columns = columns;
         this.entries = entries;
@@ -38,6 +39,7 @@ public class JournalController {
         this.users = users;
         this.access = access;
         this.dashboards = dashboards;
+        this.notifier = notifier;
     }
 
     private AppUser currentUser(Authentication authentication) {
@@ -193,6 +195,9 @@ public class JournalController {
             saved = entries.save(existing);
         }
 
+        if (saved != null) {
+            notifier.notifyCell(student, column.getSubject().getName(), saved, user.getFullName());
+        }
         List<JournalColumn> cols = columns.findByStudyGroupAndSubjectOrderByColumnDateAsc(
                 column.getStudyGroup(), column.getSubject());
         List<JournalEntry> studentEntries = entries.findByStudentAndJournalColumnIn(student, cols);

@@ -1,5 +1,6 @@
 package com.voscorp.vosmlp.auth;
 
+import com.voscorp.vosmlp.notifications.NotificationService;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,9 +18,11 @@ public class CurrentUserAdvice {
             UserRole.STAROSTA, "Староста");
 
     private final AppUserRepository users;
+    private final NotificationService notifications;
 
-    public CurrentUserAdvice(AppUserRepository users) {
+    public CurrentUserAdvice(AppUserRepository users, NotificationService notifications) {
         this.users = users;
+        this.notifications = notifications;
     }
 
     @ModelAttribute
@@ -29,6 +32,7 @@ public class CurrentUserAdvice {
             model.addAttribute("currentName", u.getFullName());
             model.addAttribute("currentRole", u.getRole().name());
             model.addAttribute("currentRoleLabel", LABELS.get(u.getRole()));
+            model.addAttribute("unreadCount", notifications.unreadCount(u));
         });
     }
 }

@@ -1,0 +1,7 @@
+/* notificationsStyle.css — страница уведомлений */
+.notif-actions { margin-bottom: 16px; }
+.notif-empty { color: var(--text-muted); }
+.notif-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.notif-item { display: flex; justify-content: space-between; align-items: center; gap: 16px; border-left: 4px solid var(--line); }
+.notif-item.unread { border-left-color: var(--primary); background: color-mix(in srgb, var(--snow-sky) 18%, white); }
+.notif-time { color: var(--text-muted); font-size: 13px; }

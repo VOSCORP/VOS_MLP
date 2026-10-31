@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/generalStyle.css}">
+    <script th:if="${currentName}" th:src="@{/js/notifications.js}" defer></script>
     <link rel="stylesheet" th:href="@{'/css/pages/' + ${pageCss}}">
 </head>
 
@@ -39,7 +40,14 @@
 <header class="topbar" th:fragment="topbar(title)">
     <h1 th:text="${title}">Страница</h1>
     <div class="topbar-right">
-    <span class="topbar-user" th:if="${currentName}">
+        <a class="bell" th:href="@{/notifications}" title="Уведомления" th:if="${currentName}">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+            </svg>
+            <span class="bell-count" th:if="${unreadCount != null and unreadCount > 0}" th:text="${unreadCount}"></span>
+        </a>
+        <span class="topbar-user" th:if="${currentName}">
       <span th:text="${currentName}"></span> · <span th:text="${currentRoleLabel}"></span>
     </span>
         <form th:action="@{/logout}" method="post">
