@@ -26,11 +26,13 @@ public class JournalController {
     private final JournalAccess access;
     private final DashboardService dashboards;
     private final JournalNotifier notifier;
+    private final GrantService grantService;
 
     public JournalController(SubjectRepository subjects, JournalColumnRepository columns,
                              JournalEntryRepository entries, StudentRepository students,
                              JournalCalc calc, AppUserRepository users, JournalAccess access,
-                             DashboardService dashboards, JournalNotifier notifier) {
+                             DashboardService dashboards, JournalNotifier notifier,
+                             GrantService grantService) {
         this.subjects = subjects;
         this.columns = columns;
         this.entries = entries;
@@ -40,6 +42,7 @@ public class JournalController {
         this.access = access;
         this.dashboards = dashboards;
         this.notifier = notifier;
+        this.grantService = grantService;
     }
 
     private AppUser currentUser(Authentication authentication) {
@@ -52,6 +55,16 @@ public class JournalController {
                           Authentication authentication,
                           Model model) {
         AppUser user = currentUser(authentication);
+        grantService.expireOverdue(); // автозакрытие просроченных доступов
+
+        if (user.getRole() == UserRole.TEACHER) {
+            model.addAttribute("helpStarostas", grantService.starostaOptions());
+            model.addAttribute("helpGroups", grantService.teacherGroups(user));
+            model.addAttribute("myIssuedGrants", grantService.viewsIssuedBy(user));
+        }
+        if (user.getRole() == UserRole.STAROSTA) {
+            model.addAttribute("myGrants", grantService.viewsForStarosta(user));
+        }
 
         List<StudyGroup> allGroups = access.visibleGroups(user);
         if (allGroups.isEmpty()) {
@@ -117,6 +130,7 @@ public class JournalController {
         if (viewerIsStudentSide && user.getLinkedStudent() != null) {
             model.addAttribute("dashboard", dashboards.build(user.getLinkedStudent()));
         }
+
         model.addAttribute("groups", allGroups);
         model.addAttribute("subjects", allSubjects);
         model.addAttribute("selectedGroupId", group.getId());
@@ -143,10 +157,6 @@ public class JournalController {
         if (student == null || column == null) {
             return error(HttpStatus.BAD_REQUEST, "Студент или столбец не найден");
         }
-        // проверка прав на сервере
-        if (!access.canEdit(user, column.getStudyGroup(), column.getSubject())) {
-            return error(HttpStatus.FORBIDDEN, "У вас нет прав на правку этого журнала");
-        }
 
         CellStatus st;
         try {
@@ -162,9 +172,19 @@ public class JournalController {
             } catch (NumberFormatException ex) {
                 return error(HttpStatus.BAD_REQUEST, "Оценка должна быть целым числом");
             }
-            if (sc < 0 || sc > 100) {
-                return error(HttpStatus.BAD_REQUEST, "Оценка должна быть от 0 до 100. Значение не сохранено.");
-            }
+        }
+        if (st == CellStatus.ABSENT) { sc = null; }
+        boolean makesEmpty = st == CellStatus.NORMAL && sc == null;
+
+        // проверка прав на сервере: роль, группа, предмет, тип доступа
+        JournalEntry existing = entries.findByStudentAndJournalColumn(student, column).orElse(null);
+        String denied = access.checkCellEdit(user, column, existing, st, makesEmpty);
+        if (denied != null) {
+            return error(HttpStatus.FORBIDDEN, denied);
+        }
+
+        if (sc != null && (sc < 0 || sc > 100)) {
+            return error(HttpStatus.BAD_REQUEST, "Оценка должна быть от 0 до 100. Значение не сохранено.");
         }
         if (st == CellStatus.MAKEUP && sc != null && sc > 80) {
             return error(HttpStatus.BAD_REQUEST,
@@ -173,13 +193,11 @@ public class JournalController {
         if (st == CellStatus.LATE && (lateMinutes == null || lateMinutes < 1)) {
             return error(HttpStatus.BAD_REQUEST, "Укажите, на сколько минут опоздал студент");
         }
-        if (st == CellStatus.ABSENT) { sc = null; }
         if (st != CellStatus.LATE) { lateMinutes = null; }
         boolean ex = st == CellStatus.ABSENT && excused;
 
-        JournalEntry existing = entries.findByStudentAndJournalColumn(student, column).orElse(null);
         JournalEntry saved = null;
-        if (st == CellStatus.NORMAL && sc == null) {
+        if (makesEmpty) {
             // пустая ячейка: запись удаляем, ноль не ставим
             if (existing != null) { entries.delete(existing); }
         } else if (existing == null) {
@@ -198,6 +216,7 @@ public class JournalController {
         if (saved != null) {
             notifier.notifyCell(student, column.getSubject().getName(), saved, user.getFullName());
         }
+
         List<JournalColumn> cols = columns.findByStudyGroupAndSubjectOrderByColumnDateAsc(
                 column.getStudyGroup(), column.getSubject());
         List<JournalEntry> studentEntries = entries.findByStudentAndJournalColumnIn(student, cols);

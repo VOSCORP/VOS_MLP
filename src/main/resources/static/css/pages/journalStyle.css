@@ -102,3 +102,22 @@ table.journal { border-collapse: separate; border-spacing: 0; min-width: 100%; f
 .bar-fill.ok { background: var(--status-ok); }
 .bar-fill.warn { background: var(--status-warn); }
 .bar-fill.bad { background: var(--status-bad); }
+
+/* ---- шаг 5д: помощь с журналом ---- */
+.help-btn { margin-bottom: 16px; }
+.help-msg { padding: 12px 16px; border-radius: 12px; margin-bottom: 14px; font-weight: 700; }
+.help-msg.ok { background: color-mix(in srgb, var(--status-ok) 25%, white); }
+.help-msg.bad { background: color-mix(in srgb, var(--status-bad) 20%, white); }
+
+.grant-banner { margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; border-left: 4px solid var(--primary); }
+.grant-line { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 14px; }
+.grant-line form { display: inline; }
+
+.help-panel { width: 400px; }
+.help-subtitle { margin: 26px 0 10px; color: var(--heading); }
+.radio-row { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
+.panel-field input[type="datetime-local"] {
+    font: inherit; padding: 9px 12px; width: 100%;
+    border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text);
+}
+[hidden] { display: none !important; }

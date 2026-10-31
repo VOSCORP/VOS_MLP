@@ -129,6 +129,13 @@ public class AccessSeed implements CommandLineRunner {
                 break;
             }
         }
+
+        // второй староста и «сегодняшние» занятия для проверки доступа старост
+        AppUser starosta2 = new AppUser("starosta2", encoder.encode("demo123"), "Ахметов Расул", UserRole.STAROSTA);
+        starosta2.setLinkedStudent(studentByName("Ахметов Расул"));
+        users.save(starosta2);
+        columns.save(new JournalColumn(g1, prog, LocalDate.now(), ColumnType.LESSON, "сегодняшнее занятие"));
+        columns.save(new JournalColumn(g2, prog, LocalDate.now(), ColumnType.LESSON, "сегодняшнее занятие"));
     }
 
     private void addLessons(StudyGroup group, Subject subject, List<Student> list,

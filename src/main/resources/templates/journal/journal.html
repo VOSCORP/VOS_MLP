@@ -58,6 +58,21 @@
                     </select>
                     <button class="btn btn-main" type="submit">Показать</button>
                 </form>
+                <p class="help-msg ok" th:if="${helpMessage}" th:text="${helpMessage}"></p>
+                <p class="help-msg bad" th:if="${helpError}" th:text="${helpError}"></p>
+
+                <div class="grant-banner card" th:if="${myGrants != null and !#lists.isEmpty(myGrants)}">
+                    <b>Доступ от преподавателя</b>
+                    <div class="grant-line" th:each="g : ${myGrants}">
+                        <span th:text="${g.groupName + ' · ' + g.subjectsText + ' · ' + g.typeLabel + ' · до ' + g.expiresText + ' · ' + g.teacherName}"></span>
+                        <form th:if="${g.canDone}" th:action="@{/journal/help/grants/{id}/done(id=${g.id})}" method="post">
+                            <button class="btn btn-main" type="submit">Выполнил</button>
+                        </form>
+                        <span class="chip warn" th:unless="${g.canDone}">Ждёт закрытия преподавателем</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-main help-btn" type="button" id="btnHelp" th:if="${helpGroups != null}">Помощь с журналом</button>
 
                 <p class="journal-help" th:if="${editable}">Двойной клик по ячейке: ввести оценку. Один клик: панель ячейки. Клик по фамилии: стипендия.
                     Итоговый = средний × (0,9 + 0,1 × посещаемость).</p>
@@ -156,6 +171,76 @@
     </div>
 </aside>
 
+<!-- Панель «Помощь с журналом» (только для преподавателя) -->
+<aside id="helpPanel" class="cell-panel help-panel" th:if="${helpGroups != null}"
+       th:attr="data-open=${helpError != null}" aria-label="Помощь с журналом">
+    <h3>Помощь с журналом</h3>
+    <p class="sub">Выдайте старосте доступ к таблице</p>
+
+    <form th:action="@{/journal/help/grant}" method="post">
+        <label class="panel-field">Староста
+            <select name="starostaId" id="hStarosta" required>
+                <option th:each="s : ${helpStarostas}" th:value="${s.id}" th:attr="data-group=${s.groupId}"
+                        th:text="${s.name + ' · ' + s.groupName}"></option>
+            </select>
+        </label>
+
+        <div class="panel-field">Какая таблица
+            <label class="radio-row"><input type="radio" name="scope" value="own" checked> Своей группы старосты</label>
+            <label class="radio-row"><input type="radio" name="scope" value="other"> Другой группы</label>
+        </div>
+
+        <div id="hOther" hidden>
+            <label class="panel-field">Группа
+                <select name="targetGroupId" id="hTarget">
+                    <option th:each="g : ${helpGroups}" th:value="${g.id}" th:text="${g.name}"></option>
+                </select>
+            </label>
+            <label class="radio-row"><input type="checkbox" name="notifyStarosta"> Уведомить старосту этой группы</label>
+            <label class="radio-row"><input type="checkbox" name="notifyCurator"> Уведомить куратора этой группы</label>
+        </div>
+
+        <label class="panel-field">Что разрешить
+            <select name="accessType">
+                <option value="CHANGE">Изменить (только поставленные оценки)</option>
+                <option value="FILL">Заполнить (только пустые ячейки)</option>
+                <option value="BOTH">Изменить и заполнить</option>
+            </select>
+        </label>
+
+        <div class="panel-field">Предметы
+            <div class="subject-block" th:each="g : ${helpGroups}" th:attr="data-group=${g.id}" hidden>
+                <label class="radio-row" th:each="s : ${g.subjects}">
+                    <input type="checkbox" name="subjectIds" th:value="${s.id}" disabled> <span th:text="${s.name}"></span>
+                </label>
+            </div>
+            <span class="stat-sub" id="hNoSubjects" hidden>Вы не ведёте предметов в этой группе.</span>
+        </div>
+
+        <label class="panel-field">Автоматически закрыть доступ
+            <input type="datetime-local" name="expiresAt" id="hExpires" required>
+        </label>
+        <p class="panel-hint">Обязательно: если вы забудете закрыть доступ, он закроется сам в это время.</p>
+
+        <div class="panel-actions">
+            <button class="btn btn-main" type="submit">Подтвердить</button>
+            <button class="btn" type="button" id="hClose">Закрыть</button>
+        </div>
+    </form>
+
+    <h3 class="help-subtitle">Выданные доступы</h3>
+    <p class="stat-sub" th:if="${#lists.isEmpty(myIssuedGrants)}">Пока ничего не выдано.</p>
+    <div class="sp-line" th:each="g : ${myIssuedGrants}">
+        <b th:text="${g.starostaName + ' · ' + g.groupName}"></b>
+        <span th:text="${g.subjectsText + ' · ' + g.typeLabel + ' · до ' + g.expiresText}"></span>
+        <span class="chip" th:classappend="${g.statusState}" th:text="${g.statusLabel}"></span>
+        <form th:if="${g.canClose}" th:action="@{/journal/help/grants/{id}/close(id=${g.id})}" method="post">
+            <button class="btn" type="submit">Закрыть доступ</button>
+        </form>
+    </div>
+</aside>
+
 <script th:src="@{/js/journal.js}"></script>
+<script th:src="@{/js/journalHelp.js}"></script>
 </body>
 </html>
