@@ -24,10 +24,12 @@ public class JournalController {
     private final JournalCalc calc;
     private final AppUserRepository users;
     private final JournalAccess access;
+    private final DashboardService dashboards;
 
     public JournalController(SubjectRepository subjects, JournalColumnRepository columns,
                              JournalEntryRepository entries, StudentRepository students,
-                             JournalCalc calc, AppUserRepository users, JournalAccess access) {
+                             JournalCalc calc, AppUserRepository users, JournalAccess access,
+                             DashboardService dashboards) {
         this.subjects = subjects;
         this.columns = columns;
         this.entries = entries;
@@ -35,6 +37,7 @@ public class JournalController {
         this.calc = calc;
         this.users = users;
         this.access = access;
+        this.dashboards = dashboards;
     }
 
     private AppUser currentUser(Authentication authentication) {
@@ -107,6 +110,11 @@ public class JournalController {
                     calc.finalScore(studentEntries, cols.size()), "YES".equals(sr.getStatus())));
         }
 
+        boolean viewerIsStudentSide = user.getRole() == UserRole.STUDENT
+                || user.getRole() == UserRole.STAROSTA || user.getRole() == UserRole.PARENT;
+        if (viewerIsStudentSide && user.getLinkedStudent() != null) {
+            model.addAttribute("dashboard", dashboards.build(user.getLinkedStudent()));
+        }
         model.addAttribute("groups", allGroups);
         model.addAttribute("subjects", allSubjects);
         model.addAttribute("selectedGroupId", group.getId());
@@ -173,12 +181,15 @@ public class JournalController {
             // пустая ячейка: запись удаляем, ноль не ставим
             if (existing != null) { entries.delete(existing); }
         } else if (existing == null) {
-            saved = entries.save(new JournalEntry(student, column, sc, st, lateMinutes, ex));
+            JournalEntry created = new JournalEntry(student, column, sc, st, lateMinutes, ex);
+            created.markGradedBy(user.getFullName());
+            saved = entries.save(created);
         } else {
             existing.setScore(sc);
             existing.setStatus(st);
             existing.setLateMinutes(lateMinutes);
             existing.setExcused(ex);
+            existing.markGradedBy(user.getFullName());
             saved = entries.save(existing);
         }
 

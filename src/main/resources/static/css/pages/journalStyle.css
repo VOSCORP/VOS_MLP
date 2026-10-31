@@ -86,3 +86,19 @@ table.journal { border-collapse: separate; border-spacing: 0; min-width: 100%; f
 .sp-line { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; margin-bottom: 10px; border-radius: 12px; background: var(--surface-soft); border-left: 4px solid var(--status-warn); }
 .sp-line.ok { border-left-color: var(--status-ok); }
 .sp-line span { color: var(--text-muted); font-size: 14px; }
+
+/* ---- шаг 5в: карточки студента ---- */
+.stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 22px; }
+.stat-card { display: flex; flex-direction: column; gap: 8px; }
+.stat-card h3 { color: var(--heading); font-size: 15px; text-transform: uppercase; letter-spacing: .04em; }
+.stat-big { font-size: 26px; font-weight: 800; color: var(--heading); line-height: 1.2; }
+.stat-muted { font-size: 18px; color: var(--text-muted); }
+.stat-sub { color: var(--text-muted); font-size: 14px; }
+.stat-list { margin: 0 0 0 18px; font-size: 14px; }
+.stat-soon { border: 2px dashed var(--line); box-shadow: none; background: transparent; }
+
+.bar { height: 12px; border-radius: 999px; background: var(--surface-soft); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; }
+.bar-fill.ok { background: var(--status-ok); }
+.bar-fill.warn { background: var(--status-warn); }
+.bar-fill.bad { background: var(--status-bad); }

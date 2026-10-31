@@ -9,4 +9,5 @@ public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long
     List<JournalEntry> findByJournalColumnIn(List<JournalColumn> columns);
     Optional<JournalEntry> findByStudentAndJournalColumn(Student student, JournalColumn journalColumn);
     List<JournalEntry> findByStudentAndJournalColumnIn(Student student, List<JournalColumn> columns);
+    List<JournalEntry> findByStudent(Student student);
 }

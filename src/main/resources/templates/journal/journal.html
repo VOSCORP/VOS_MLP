@@ -11,6 +11,42 @@
             <p th:if="${empty}">Групп и предметов пока нет.</p>
 
             <div th:unless="${empty}">
+                <section class="stat-cards" th:if="${dashboard != null}">
+
+                    <article class="card stat-card">
+                        <h3>Оценка дня</h3>
+                        <div th:if="${dashboard.gotToday}">
+                            <p class="stat-big" th:each="line : ${dashboard.todayLines}" th:text="${line}"></p>
+                        </div>
+                        <p class="stat-big stat-muted" th:unless="${dashboard.gotToday}">Сегодня вы не получили балл</p>
+                        <p class="stat-sub">Лучшие баллы по предметам</p>
+                        <ul class="stat-list">
+                            <li th:each="line : ${dashboard.bestLines}" th:text="${line}"></li>
+                        </ul>
+                    </article>
+
+                    <article class="card stat-card">
+                        <h3>Повышенная стипендия</h3>
+                        <p class="stat-big"><span th:text="${dashboard.chancePercent}"></span>%</p>
+                        <span class="chip" th:classappend="${dashboard.chanceState}"
+                              th:text="${dashboard.chanceState == 'ok'} ? 'Проходите' : (${dashboard.chanceState == 'bad'} ? 'Нет возможности' : 'Есть шанс')"></span>
+                        <p class="stat-sub" th:text="${dashboard.chanceText}"></p>
+                    </article>
+
+                    <article class="card stat-card">
+                        <h3>Посещаемость</h3>
+                        <p class="stat-big"><span th:text="${dashboard.attendancePercent}"></span>%</p>
+                        <div class="bar"><div class="bar-fill" th:classappend="${dashboard.attendanceState}"
+                                              th:style="'width:' + ${dashboard.attendancePercent} + '%'"></div></div>
+                        <p class="stat-sub">Считается с последней ключевой даты (РК, зачётная неделя, аттестация). Ниже 70% повышенная стипендия недоступна.</p>
+                    </article>
+
+                    <article class="card stat-card stat-soon">
+                        <h3>Coming Soon</h3>
+                        <p class="stat-sub">Здесь скоро появится новая карточка.</p>
+                    </article>
+
+                </section>
                 <form class="journal-filter" method="get" th:action="@{/journal}">
                     <select name="groupId">
                         <option th:each="g : ${groups}" th:value="${g.id}" th:text="${g.name}"

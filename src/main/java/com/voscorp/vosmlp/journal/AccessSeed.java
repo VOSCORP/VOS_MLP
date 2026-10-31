@@ -108,5 +108,50 @@ public class AccessSeed implements CommandLineRunner {
         AppUser starosta1 = users.findByUsername("starosta1").orElseThrow();
         starosta1.setLinkedStudent(omarov);
         users.save(starosta1);
+
+        // занятия после РК1: нужны для карточки посещаемости
+        List<Student> g1Students = students.findAll().stream()
+                .filter(s -> s.getStudyGroup() != null && s.getStudyGroup().getId().equals(g1.getId()))
+                .toList();
+        addLessons(g1, prog, g1Students,
+                new LocalDate[]{LocalDate.of(2026, 10, 23), LocalDate.of(2026, 10, 27)},
+                new String[]{"MVC", "REST"}, false);
+        addLessons(g1, math, g1Students,
+                new LocalDate[]{LocalDate.of(2026, 10, 22), LocalDate.of(2026, 10, 26)},
+                new String[]{"ряды", "матрицы"}, true);
+
+        // оценка «сегодня» для карточки «Оценка дня»
+        for (JournalEntry e : entries.findByStudent(ivanov)) {
+            if (e.getScore() != null && e.getStatus() == CellStatus.NORMAL
+                    && e.getJournalColumn().getSubject().getId().equals(prog.getId())) {
+                e.markGradedBy("Асанов Бауыржан");
+                entries.save(e);
+                break;
+            }
+        }
+    }
+
+    private void addLessons(StudyGroup group, Subject subject, List<Student> list,
+                            LocalDate[] dates, String[] tasks, boolean math) {
+        for (int c = 0; c < dates.length; c++) {
+            JournalColumn col = columns.save(new JournalColumn(group, subject, dates[c], ColumnType.LESSON, tasks[c]));
+            for (int s = 0; s < list.size(); s++) {
+                Student st = list.get(s);
+                String name = st.getFullName();
+                int score = 72 + ((s * 9 + c * 5) % 27);
+                if (name.equals("Омаров Ерлан")) { score = 96; }
+                if (name.equals("Жумабаева Динара")) { score = math ? 86 : 95; }
+
+                JournalEntry entry;
+                if (name.equals("Иванов Алихан") && !math && c == 0) {
+                    entry = new JournalEntry(st, col, null, CellStatus.ABSENT, null, false); // пропуск без причины
+                } else if (name.equals("Смагулов Данияр") && math && c == 0) {
+                    entry = new JournalEntry(st, col, 80, CellStatus.LATE, 15, false);       // опоздание
+                } else {
+                    entry = new JournalEntry(st, col, score, CellStatus.NORMAL, null, false);
+                }
+                entries.save(entry);
+            }
+        }
     }
 }

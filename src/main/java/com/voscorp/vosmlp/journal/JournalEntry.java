@@ -23,6 +23,9 @@ public class JournalEntry {
     private Integer lateMinutes;
     private boolean excused;
 
+    private String gradedBy;
+    private java.time.LocalDateTime gradedAt;
+
     protected JournalEntry() {}
 
     public JournalEntry(Student student, JournalColumn journalColumn, Integer score,
@@ -47,4 +50,13 @@ public class JournalEntry {
     public void setStatus(CellStatus status) { this.status = status; }
     public void setLateMinutes(Integer lateMinutes) { this.lateMinutes = lateMinutes; }
     public void setExcused(boolean excused) { this.excused = excused; }
+
+    public String getGradedBy() { return gradedBy; }
+    public java.time.LocalDateTime getGradedAt() { return gradedAt; }
+
+    // запоминаем, кто и когда поставил оценку
+    public void markGradedBy(String name) {
+        this.gradedBy = name;
+        this.gradedAt = java.time.LocalDateTime.now();
+    }
 }
