@@ -5,7 +5,6 @@ import com.voscorp.vosmlp.auth.UserRole;
 import com.voscorp.vosmlp.students.Student;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -120,7 +119,7 @@ public class JournalAccess {
         return new ArrayList<>(all.values());
     }
 
-    // можно ли вообще править эту таблицу (сами правила по ячейкам ниже)
+    // можно ли править эту таблицу (сами правила по ячейкам ниже)
     public boolean canEdit(AppUser user, StudyGroup group, Subject subject) {
         switch (user.getRole()) {
             case ADMIN:
@@ -128,7 +127,7 @@ public class JournalAccess {
             case TEACHER:
                 return assignments.existsByTeacherAndStudyGroupAndSubject(user, group, subject);
             case STAROSTA:
-                return isOwnGroup(user, group) || !grantsFor(user, group, subject).isEmpty();
+                return !grantsFor(user, group, subject).isEmpty();
             default:
                 return false;
         }
@@ -147,20 +146,10 @@ public class JournalAccess {
             return "Журнал открыт только для просмотра";
         }
 
-        // 1) отметки о посещаемости в своей группе в день занятия: разрешение не нужно
-        boolean today = column.getColumnDate().equals(LocalDate.now());
-        boolean attendanceMark = newStatus == CellStatus.LATE || newStatus == CellStatus.ABSENT;
-        boolean existingMark = existing != null
-                && (existing.getStatus() == CellStatus.LATE || existing.getStatus() == CellStatus.ABSENT);
-        if (isOwnGroup(user, group) && today) {
-            if (attendanceMark && (existing == null || existingMark)) { return null; }
-            if (makesEmpty && existingMark) { return null; }
-        }
-
-        // 2) всё остальное только по доступу от преподавателя
+        // староста правит оценки только по доступу от преподавателя
         List<JournalGrant> matching = grantsFor(user, group, subject);
         if (matching.isEmpty()) {
-            return "Нужен доступ от преподавателя. Без него вы можете отмечать только опоздания и пропуски своей группы в день занятия.";
+            return "Нужен доступ от преподавателя. Посещаемость вы отмечаете на странице «Посещаемость».";
         }
         if (makesEmpty) { return "Староста не может удалять оценки."; }
 

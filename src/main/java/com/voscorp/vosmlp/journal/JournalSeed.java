@@ -77,16 +77,10 @@ public class JournalSeed implements CommandLineRunner {
                 if ((s + c) % 9 == 0 && s != 5 && s != 6) { continue; }         // пустая ячейка
 
                 JournalEntry entry;
-                if (s == 2 && c == 1) {
-                    entry = new JournalEntry(list.get(s), cols.get(c), 85, CellStatus.LATE, 10, false);
-                } else if (s == 3 && c == 2) {
-                    entry = new JournalEntry(list.get(s), cols.get(c), null, CellStatus.ABSENT, null, false);
-                } else if (s == 1 && c == 0) {
-                    entry = new JournalEntry(list.get(s), cols.get(c), null, CellStatus.ABSENT, null, true);
-                } else if (s == 4 && c == 3) {
-                    entry = new JournalEntry(list.get(s), cols.get(c), 80, CellStatus.MAKEUP, null, false);
+                if (s == 4 && c == 3) {
+                    entry = new JournalEntry(list.get(s), cols.get(c), 80, CellStatus.MAKEUP); // отработка
                 } else {
-                    entry = new JournalEntry(list.get(s), cols.get(c), score, CellStatus.NORMAL, null, false);
+                    entry = new JournalEntry(list.get(s), cols.get(c), score, CellStatus.NORMAL);
                 }
                 entries.save(entry);
             }

@@ -4,17 +4,22 @@ import com.voscorp.vosmlp.journal.ColumnType;
 import com.voscorp.vosmlp.journal.JournalColumn;
 import com.voscorp.vosmlp.journal.JournalColumnRepository;
 import com.voscorp.vosmlp.journal.StudyGroup;
+import com.voscorp.vosmlp.journal.Subject;
+import com.voscorp.vosmlp.students.Student;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 public class AttendanceCalc {
     private final JournalColumnRepository columns;
+    private final AttendanceRecordRepository records;
 
-    public AttendanceCalc(JournalColumnRepository columns) {
+    public AttendanceCalc(JournalColumnRepository columns, AttendanceRecordRepository records) {
         this.columns = columns;
+        this.records = records;
     }
 
     // Текущий период группы: между ключевыми датами (РК1, РК2, зачётная неделя, аттестация).
@@ -54,5 +59,30 @@ public class AttendanceCalc {
         }
         int percent = totalLessons == 0 ? 100 : (int) Math.max(0, Math.round(100 - lost / totalLessons * 100));
         return new int[]{absences, lates, percent};
+    }
+
+    // Посещаемость студента по одному предмету за текущий период (для итогового балла в журнале)
+    public int percentFor(Student student, StudyGroup group, Subject subject) {
+        LocalDate[] period = currentPeriod(group);
+        List<JournalColumn> lessons = columns.findByStudyGroupAndSubjectOrderByColumnDateAsc(group, subject).stream()
+                .filter(c -> c.getType() == ColumnType.LESSON && inPeriod(c, period))
+                .toList();
+        return percentOf(student, lessons);
+    }
+
+    // Посещаемость студента по всем предметам группы за текущий период (для карточки студента)
+    public int percentOverall(Student student) {
+        StudyGroup group = student.getStudyGroup();
+        if (group == null) { return 100; }
+        LocalDate[] period = currentPeriod(group);
+        List<JournalColumn> lessons = columns.findByStudyGroup(group).stream()
+                .filter(c -> c.getType() == ColumnType.LESSON && inPeriod(c, period))
+                .toList();
+        return percentOf(student, lessons);
+    }
+
+    private int percentOf(Student student, List<JournalColumn> lessons) {
+        if (lessons.isEmpty()) { return 100; }
+        return stats(records.findByStudentAndJournalColumnIn(student, lessons), lessons.size())[2];
     }
 }

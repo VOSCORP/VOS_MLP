@@ -19,27 +19,22 @@ public class JournalCalc {
         this.entries = entries;
     }
 
-    // Итог = средний × (0,9 + 0,1 × посещаемость).
-    // Пропуск без причины = 1, опоздание = 0,5, пропуск с причиной не считается.
-    public String finalScore(Collection<JournalEntry> list, int totalColumns) {
+    // Итог = средний × (0,9 + 0,1 × посещаемость). Посещаемость в процентах берётся из модуля «Посещаемость».
+    public String finalScore(Collection<JournalEntry> list, int attendancePercent) {
         int count = 0;
         int sum = 0;
-        double lost = 0;
         for (JournalEntry e : list) {
-            if (e.getScore() != null && e.getStatus() != CellStatus.ABSENT) {
+            if (e.getScore() != null) {
                 count++;
                 sum += e.getScore();
             }
-            if (e.getStatus() == CellStatus.ABSENT && !e.isExcused()) { lost += 1; }
-            else if (e.getStatus() == CellStatus.LATE) { lost += 0.5; }
         }
         if (count == 0) { return "—"; }
-        double attendance = totalColumns == 0 ? 1.0 : Math.max(0, 1 - lost / totalColumns);
         double average = (double) sum / count;
-        return String.format("%.2f", average * (0.9 + 0.1 * attendance));
+        return String.format("%.2f", average * (0.9 + 0.1 * attendancePercent / 100.0));
     }
 
-    // Проверка на повышенную стипендию по всем предметам студента (правило из ТЗ: средний от 90)
+    // Проверка на повышенную стипендию по всем предметам студента (правило: средний от 90)
     public ScholarshipResult scholarship(Student student) {
         List<ScholarshipResult.Line> lines = new ArrayList<>();
         StudyGroup group = student.getStudyGroup();
@@ -54,7 +49,7 @@ public class JournalCalc {
             int count = 0;
             int sum = 0;
             for (JournalEntry e : entries.findByStudentAndJournalColumnIn(student, cols)) {
-                if (e.getScore() != null && e.getStatus() != CellStatus.ABSENT) {
+                if (e.getScore() != null) {
                     count++;
                     sum += e.getScore();
                 }

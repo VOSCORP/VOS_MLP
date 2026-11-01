@@ -1,4 +1,4 @@
-// journal.js — журнал: правка ячеек, панель ячейки, панель стипендии
+// journal.js — журнал: правка оценок, панель ячейки, панель стипендии
 (function () {
   var scroll = document.querySelector('.journal-scroll');
   if (!scroll) { return; }
@@ -11,10 +11,6 @@
     what: document.getElementById('panelWhat'),
     status: document.getElementById('fStatus'),
     score: document.getElementById('fScore'),
-    minutes: document.getElementById('fMinutes'),
-    excused: document.getElementById('fExcused'),
-    minutesBox: document.getElementById('boxMinutes'),
-    excusedBox: document.getElementById('boxExcused'),
     hint: document.getElementById('panelHint'),
     msg: document.getElementById('panelMsg')
   };
@@ -26,8 +22,16 @@
   };
   var current = null;
   var VERIFIED = '<svg class="verified-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
-    '<circle cx="12" cy="12" r="11"></circle>' +
-    '<path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+      '<circle cx="12" cy="12" r="11"></circle>' +
+      '<path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+
+  function csrfHeaders() {
+    var h = { 'Content-Type': 'application/x-www-form-urlencoded' };
+    var token = document.querySelector('meta[name="_csrf"]');
+    var name = document.querySelector('meta[name="_csrf_header"]');
+    if (token && name) { h[name.content] = token.content; }
+    return h;
+  }
 
   function toast(text, bad) {
     var el = document.createElement('div');
@@ -53,11 +57,7 @@
   }
 
   function syncFields() {
-    var s = f.status.value;
-    f.minutesBox.hidden = s !== 'LATE';
-    f.excusedBox.hidden = s !== 'ABSENT';
-    f.hint.hidden = s !== 'MAKEUP';
-    f.score.disabled = s === 'ABSENT';
+    f.hint.hidden = f.status.value !== 'MAKEUP';
   }
 
   function fillPanel(td) {
@@ -65,8 +65,6 @@
     f.what.textContent = labelOf(td);
     f.status.value = td.dataset.status;
     f.score.value = td.dataset.score;
-    f.minutes.value = td.dataset.minutes;
-    f.excused.checked = td.dataset.excused === 'true';
     f.msg.textContent = '';
     syncFields();
   }
@@ -115,8 +113,6 @@
     td.title = j.title;
     td.dataset.status = j.status;
     td.dataset.score = j.score;
-    td.dataset.minutes = j.lateMinutes;
-    td.dataset.excused = String(j.excused);
     var row = td.parentElement;
     var avg = row.querySelector('.col-avg');
     if (avg) { avg.textContent = j.average; }
@@ -125,24 +121,12 @@
     refreshBadge(row);
   }
 
-  function csrfHeaders() {
-    var h = { 'Content-Type': 'application/x-www-form-urlencoded' };
-    var token = document.querySelector('meta[name="_csrf"]');
-    var name = document.querySelector('meta[name="_csrf_header"]');
-    if (token && name) { h[name.content] = token.content; }
-    return h;
-  }
-
   async function send(td, data) {
     var params = new URLSearchParams({ studentId: td.dataset.student, columnId: td.dataset.column });
     Object.keys(data).forEach(function (k) { params.append(k, data[k]); });
     var json;
     try {
-      var res = await fetch(url, {
-        method: 'POST',
-        headers: csrfHeaders(),
-        body: params
-      });
+      var res = await fetch(url, { method: 'POST', headers: csrfHeaders(), body: params });
       json = await res.json();
     } catch (e) {
       toast('Нет связи с сервером', true);
@@ -161,7 +145,7 @@
   function editInline(td) {
     if (td.querySelector('input')) { return; }
     var oldText = td.textContent;
-    var status = td.dataset.status === 'ABSENT' ? 'NORMAL' : td.dataset.status;
+    var status = td.dataset.status || 'NORMAL';
     var input = document.createElement('input');
     input.type = 'number';
     input.min = 0;
@@ -178,12 +162,7 @@
       if (done) { return; }
       done = true;
       if (!save) { td.textContent = oldText; return; }
-      var ok = await send(td, {
-        status: status,
-        score: input.value,
-        lateMinutes: td.dataset.minutes || '',
-        excused: 'false'
-      });
+      var ok = await send(td, { status: status, score: input.value });
       if (!ok) { td.textContent = oldText; }
       else if (td.classList.contains('active')) { fillPanel(td); }
     }
@@ -239,24 +218,19 @@
     var name = e.target.closest('td.student-link');
     if (name) { openStudentPanel(name); return; }
     var td = e.target.closest('td.cell');
-        if (!td || !editable || td.querySelector('input')) { return; }
+    if (!td || !editable || td.querySelector('input')) { return; }
     selectCell(td);
   });
   scroll.addEventListener('dblclick', function (e) {
     var td = e.target.closest('td.cell');
-        if (td && editable) { editInline(td); }
+    if (td && editable) { editInline(td); }
   });
 
   f.status.addEventListener('change', syncFields);
 
   document.getElementById('btnSave').addEventListener('click', async function () {
     if (!current) { return; }
-    var ok = await send(current, {
-      status: f.status.value,
-      score: f.score.value,
-      lateMinutes: f.minutes.value,
-      excused: f.excused.checked ? 'true' : 'false'
-    });
+    var ok = await send(current, { status: f.status.value, score: f.score.value });
     if (ok) { toast('Сохранено'); fillPanel(current); }
   });
   document.getElementById('btnClose').addEventListener('click', closeCellPanel);

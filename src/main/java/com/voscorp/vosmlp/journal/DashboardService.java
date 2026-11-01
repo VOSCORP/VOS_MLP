@@ -1,5 +1,6 @@
 package com.voscorp.vosmlp.journal;
 
+import com.voscorp.vosmlp.attendance.AttendanceCalc;
 import com.voscorp.vosmlp.students.Student;
 import org.springframework.stereotype.Service;
 
@@ -9,13 +10,13 @@ import java.util.*;
 @Service
 public class DashboardService {
     private final JournalEntryRepository entries;
-    private final JournalColumnRepository columns;
     private final JournalCalc calc;
+    private final AttendanceCalc attendanceCalc;
 
-    public DashboardService(JournalEntryRepository entries, JournalColumnRepository columns, JournalCalc calc) {
+    public DashboardService(JournalEntryRepository entries, JournalCalc calc, AttendanceCalc attendanceCalc) {
         this.entries = entries;
-        this.columns = columns;
         this.calc = calc;
+        this.attendanceCalc = attendanceCalc;
     }
 
     public StudentDashboard build(Student student) {
@@ -27,7 +28,7 @@ public class DashboardService {
         Map<String, Integer> best = new TreeMap<>();
         Map<String, int[]> bySubject = new TreeMap<>(); // [сумма, количество]
         for (JournalEntry e : all) {
-            if (e.getScore() == null || e.getStatus() == CellStatus.ABSENT) { continue; }
+            if (e.getScore() == null) { continue; }
             String subject = e.getJournalColumn().getSubject().getName();
             best.merge(subject, e.getScore(), Math::max);
             int[] a = bySubject.computeIfAbsent(subject, k -> new int[2]);
@@ -41,8 +42,8 @@ public class DashboardService {
         List<String> bestLines = new ArrayList<>();
         best.forEach((subject, score) -> bestLines.add(subject + ": " + score));
 
-        // 3. Посещаемость
-        int attendance = attendancePercent(student, all, today);
+        // 3. Посещаемость из модуля «Посещаемость» (все предметы, текущий период)
+        int attendance = attendanceCalc.percentOverall(student);
         String attendanceState = attendance >= 90 ? "ok" : (attendance >= 70 ? "warn" : "bad");
 
         // 2. Шанс повышенной стипендии
@@ -84,40 +85,6 @@ public class DashboardService {
 
         return new StudentDashboard(!todayLines.isEmpty(), todayLines, bestLines,
                 chance, text, state, attendance, attendanceState);
-    }
-
-    // Посещаемость = 100 − (пропуски без причины + 0,5 × опоздания) / (все занятия периода) × 100.
-    // Период: между ключевыми датами (РК1, РК2, зачётная неделя, аттестация); после каждой даты счёт с 100%.
-    private int attendancePercent(Student student, List<JournalEntry> all, LocalDate today) {
-        StudyGroup group = student.getStudyGroup();
-        if (group == null) { return 100; }
-        List<JournalColumn> groupColumns = columns.findByStudyGroup(group);
-
-        LocalDate start = LocalDate.MIN;
-        LocalDate end = LocalDate.MAX;
-        for (JournalColumn c : groupColumns) {
-            if (c.getType() == ColumnType.LESSON) { continue; }
-            LocalDate d = c.getColumnDate();
-            if (!d.isAfter(today) && d.isAfter(start)) { start = d; }
-            if (d.isAfter(today) && d.isBefore(end)) { end = d; }
-        }
-
-        Set<Long> lessonIds = new HashSet<>();
-        for (JournalColumn c : groupColumns) {
-            if (c.getType() == ColumnType.LESSON
-                    && c.getColumnDate().isAfter(start) && c.getColumnDate().isBefore(end)) {
-                lessonIds.add(c.getId());
-            }
-        }
-        if (lessonIds.isEmpty()) { return 100; }
-
-        double lost = 0;
-        for (JournalEntry e : all) {
-            if (!lessonIds.contains(e.getJournalColumn().getId())) { continue; }
-            if (e.getStatus() == CellStatus.ABSENT && !e.isExcused()) { lost += 1; }
-            else if (e.getStatus() == CellStatus.LATE) { lost += 0.5; }
-        }
-        return (int) Math.max(0, Math.round(100 - lost / lessonIds.size() * 100));
     }
 
     private String plural(int n) {

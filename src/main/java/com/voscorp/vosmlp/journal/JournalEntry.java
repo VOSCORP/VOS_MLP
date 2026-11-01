@@ -3,6 +3,8 @@ package com.voscorp.vosmlp.journal;
 import com.voscorp.vosmlp.students.Student;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 public class JournalEntry {
     @Id
@@ -20,22 +22,16 @@ public class JournalEntry {
     @Enumerated(EnumType.STRING)
     private CellStatus status;
 
-    private Integer lateMinutes;
-    private boolean excused;
-
     private String gradedBy;
-    private java.time.LocalDateTime gradedAt;
+    private LocalDateTime gradedAt;
 
     protected JournalEntry() {}
 
-    public JournalEntry(Student student, JournalColumn journalColumn, Integer score,
-                        CellStatus status, Integer lateMinutes, boolean excused) {
+    public JournalEntry(Student student, JournalColumn journalColumn, Integer score, CellStatus status) {
         this.student = student;
         this.journalColumn = journalColumn;
         this.score = score;
         this.status = status;
-        this.lateMinutes = lateMinutes;
-        this.excused = excused;
     }
 
     public Long getId() { return id; }
@@ -43,20 +39,15 @@ public class JournalEntry {
     public JournalColumn getJournalColumn() { return journalColumn; }
     public Integer getScore() { return score; }
     public CellStatus getStatus() { return status; }
-    public Integer getLateMinutes() { return lateMinutes; }
-    public boolean isExcused() { return excused; }
+    public String getGradedBy() { return gradedBy; }
+    public LocalDateTime getGradedAt() { return gradedAt; }
 
     public void setScore(Integer score) { this.score = score; }
     public void setStatus(CellStatus status) { this.status = status; }
-    public void setLateMinutes(Integer lateMinutes) { this.lateMinutes = lateMinutes; }
-    public void setExcused(boolean excused) { this.excused = excused; }
-
-    public String getGradedBy() { return gradedBy; }
-    public java.time.LocalDateTime getGradedAt() { return gradedAt; }
 
     // запоминаем, кто и когда поставил оценку
     public void markGradedBy(String name) {
         this.gradedBy = name;
-        this.gradedAt = java.time.LocalDateTime.now();
+        this.gradedAt = LocalDateTime.now();
     }
 }

@@ -1,5 +1,6 @@
 package com.voscorp.vosmlp.journal;
 
+import com.voscorp.vosmlp.attendance.AttendanceCalc;
 import com.voscorp.vosmlp.audit.AuditAction;
 import com.voscorp.vosmlp.audit.AuditService;
 import com.voscorp.vosmlp.auth.AppUser;
@@ -19,7 +20,6 @@ import java.util.*;
 
 @Controller
 public class JournalController {
-    private final SubjectRepository subjects;
     private final JournalColumnRepository columns;
     private final JournalEntryRepository entries;
     private final StudentRepository students;
@@ -30,13 +30,12 @@ public class JournalController {
     private final JournalNotifier notifier;
     private final GrantService grantService;
     private final AuditService audit;
+    private final AttendanceCalc attendanceCalc;
 
-    public JournalController(SubjectRepository subjects, JournalColumnRepository columns,
-                             JournalEntryRepository entries, StudentRepository students,
-                             JournalCalc calc, AppUserRepository users, JournalAccess access,
-                             DashboardService dashboards, JournalNotifier notifier,
-                             GrantService grantService, AuditService audit) {
-        this.subjects = subjects;
+    public JournalController(JournalColumnRepository columns, JournalEntryRepository entries,
+                             StudentRepository students, JournalCalc calc, AppUserRepository users,
+                             JournalAccess access, DashboardService dashboards, JournalNotifier notifier,
+                             GrantService grantService, AuditService audit, AttendanceCalc attendanceCalc) {
         this.columns = columns;
         this.entries = entries;
         this.students = students;
@@ -47,6 +46,7 @@ public class JournalController {
         this.notifier = notifier;
         this.grantService = grantService;
         this.audit = audit;
+        this.attendanceCalc = attendanceCalc;
     }
 
     private AppUser currentUser(Authentication authentication) {
@@ -125,8 +125,9 @@ public class JournalController {
                 if (e != null) { studentEntries.add(e); }
             }
             ScholarshipResult sr = calc.scholarship(s);
+            int attendance = attendanceCalc.percentFor(s, group, subject);
             rows.add(new JournalRow(s.getId(), s.getFullName(), cells, averageOf(studentEntries),
-                    calc.finalScore(studentEntries, cols.size()), "YES".equals(sr.getStatus())));
+                    calc.finalScore(studentEntries, attendance), "YES".equals(sr.getStatus())));
         }
 
         boolean viewerIsStudentSide = user.getRole() == UserRole.STUDENT
@@ -152,8 +153,6 @@ public class JournalController {
                                                         @RequestParam Long columnId,
                                                         @RequestParam String status,
                                                         @RequestParam(required = false) String score,
-                                                        @RequestParam(required = false) Integer lateMinutes,
-                                                        @RequestParam(defaultValue = "false") boolean excused,
                                                         Authentication authentication) {
         AppUser user = currentUser(authentication);
         Student student = students.findById(studentId).orElse(null);
@@ -177,7 +176,6 @@ public class JournalController {
                 return error(HttpStatus.BAD_REQUEST, "Оценка должна быть целым числом");
             }
         }
-        if (st == CellStatus.ABSENT) { sc = null; }
         boolean makesEmpty = st == CellStatus.NORMAL && sc == null;
 
         // проверка прав на сервере: роль, группа, предмет, тип доступа
@@ -197,25 +195,18 @@ public class JournalController {
             return error(HttpStatus.BAD_REQUEST,
                     "На отработке максимум 80 баллов. Чтобы получить больше, студент выполняет дополнительное задание преподавателя.");
         }
-        if (st == CellStatus.LATE && (lateMinutes == null || lateMinutes < 1)) {
-            return error(HttpStatus.BAD_REQUEST, "Укажите, на сколько минут опоздал студент");
-        }
-        if (st != CellStatus.LATE) { lateMinutes = null; }
-        boolean ex = st == CellStatus.ABSENT && excused;
 
         JournalEntry saved = null;
         if (makesEmpty) {
             // пустая ячейка: запись удаляем, ноль не ставим
             if (existing != null) { entries.delete(existing); }
         } else if (existing == null) {
-            JournalEntry created = new JournalEntry(student, column, sc, st, lateMinutes, ex);
+            JournalEntry created = new JournalEntry(student, column, sc, st);
             created.markGradedBy(user.getFullName());
             saved = entries.save(created);
         } else {
             existing.setScore(sc);
             existing.setStatus(st);
-            existing.setLateMinutes(lateMinutes);
-            existing.setExcused(ex);
             existing.markGradedBy(user.getFullName());
             saved = entries.save(existing);
         }
@@ -223,13 +214,10 @@ public class JournalController {
         if (saved != null) {
             notifier.notifyCell(student, column.getSubject().getName(), saved, user.getFullName());
         }
-
         if (saved != null || (makesEmpty && existing != null)) {
             AuditAction action;
             if (makesEmpty) {
                 action = AuditAction.CELL_CLEARED;
-            } else if (st == CellStatus.LATE || st == CellStatus.ABSENT) {
-                action = AuditAction.ATTENDANCE_MARK;
             } else {
                 action = existing == null ? AuditAction.GRADE_SET : AuditAction.GRADE_CHANGED;
             }
@@ -240,7 +228,8 @@ public class JournalController {
                 column.getStudyGroup(), column.getSubject());
         List<JournalEntry> studentEntries = entries.findByStudentAndJournalColumnIn(student, cols);
         String average = averageOf(studentEntries);
-        String finalScore = calc.finalScore(studentEntries, cols.size());
+        int attendance = attendanceCalc.percentFor(student, column.getStudyGroup(), column.getSubject());
+        String finalScore = calc.finalScore(studentEntries, attendance);
 
         CellView cell = new CellView(studentId, columnId, saved);
         Map<String, Object> body = new LinkedHashMap<>();
@@ -250,8 +239,6 @@ public class JournalController {
         body.put("title", cell.getTitle());
         body.put("status", cell.getStatus());
         body.put("score", cell.getScore());
-        body.put("lateMinutes", cell.getLateMinutes());
-        body.put("excused", cell.isExcused());
         body.put("average", average);
         body.put("finalScore", finalScore);
         return ResponseEntity.ok(body);
@@ -300,13 +287,11 @@ public class JournalController {
         return ResponseEntity.status(status).body(body);
     }
 
-    // Средний по баллам; пропуски и пустые ячейки в расчёт не входят
+    // Средний по баллам; пустые ячейки в расчёт не входят
     private String averageOf(Collection<JournalEntry> list) {
         List<Integer> scores = new ArrayList<>();
         for (JournalEntry e : list) {
-            if (e.getScore() != null && e.getStatus() != CellStatus.ABSENT) {
-                scores.add(e.getScore());
-            }
+            if (e.getScore() != null) { scores.add(e.getScore()); }
         }
         if (scores.isEmpty()) { return "—"; }
         return String.format("%.2f", scores.stream().mapToInt(Integer::intValue).average().orElse(0));

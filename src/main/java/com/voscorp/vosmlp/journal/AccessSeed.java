@@ -81,7 +81,7 @@ public class AccessSeed implements CommandLineRunner {
         for (int c = 0; c < cols2.size(); c++) {
             for (int s = 0; s < list2.size(); s++) {
                 int score = 75 + ((s * 5 + c * 7) % 26);
-                entries.save(new JournalEntry(list2.get(s), cols2.get(c), score, CellStatus.NORMAL, null, false));
+                entries.save(new JournalEntry(list2.get(s), cols2.get(c), score, CellStatus.NORMAL));
             }
         }
 
@@ -109,7 +109,7 @@ public class AccessSeed implements CommandLineRunner {
         starosta1.setLinkedStudent(omarov);
         users.save(starosta1);
 
-        // занятия после РК1: нужны для карточки посещаемости
+        // занятия после РК1 (текущий период)
         List<Student> g1Students = students.findAll().stream()
                 .filter(s -> s.getStudyGroup() != null && s.getStudyGroup().getId().equals(g1.getId()))
                 .toList();
@@ -130,7 +130,7 @@ public class AccessSeed implements CommandLineRunner {
             }
         }
 
-        // второй староста и «сегодняшние» занятия для проверки доступа старост
+        // второй староста и «сегодняшние» занятия для проверки доступа и посещаемости
         AppUser starosta2 = new AppUser("starosta2", encoder.encode("demo123"), "Ахметов Расул", UserRole.STAROSTA);
         starosta2.setLinkedStudent(studentByName("Ахметов Расул"));
         users.save(starosta2);
@@ -148,16 +148,7 @@ public class AccessSeed implements CommandLineRunner {
                 int score = 72 + ((s * 9 + c * 5) % 27);
                 if (name.equals("Омаров Ерлан")) { score = 96; }
                 if (name.equals("Жумабаева Динара")) { score = math ? 86 : 95; }
-
-                JournalEntry entry;
-                if (name.equals("Иванов Алихан") && !math && c == 0) {
-                    entry = new JournalEntry(st, col, null, CellStatus.ABSENT, null, false); // пропуск без причины
-                } else if (name.equals("Смагулов Данияр") && math && c == 0) {
-                    entry = new JournalEntry(st, col, 80, CellStatus.LATE, 15, false);       // опоздание
-                } else {
-                    entry = new JournalEntry(st, col, score, CellStatus.NORMAL, null, false);
-                }
-                entries.save(entry);
+                entries.save(new JournalEntry(st, col, score, CellStatus.NORMAL));
             }
         }
     }

@@ -65,5 +65,13 @@ public class AttendanceSeed implements CommandLineRunner {
         add("Смагулов Данияр", prog.get(2), AttendanceMark.LATE, 15, false);
 
         add("Каримов Тимур", math.get(1), AttendanceMark.ABSENT, null, false);
+
+        // отметки в текущем периоде (после РК1): для карточек и уведомлений админам
+        if (prog.size() > 5 && math.size() > 3) {
+            add("Иванов Алихан", prog.get(4), AttendanceMark.ABSENT, null, false);
+            add("Иванов Алихан", math.get(3), AttendanceMark.LATE, 15, false);
+            add("Смагулов Данияр", prog.get(4), AttendanceMark.LATE, 10, false);
+            add("Смагулов Данияр", prog.get(5), AttendanceMark.LATE, 7, false);
+        }
     }
 }
