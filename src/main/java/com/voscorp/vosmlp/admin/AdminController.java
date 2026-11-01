@@ -3,11 +3,16 @@ package com.voscorp.vosmlp.admin;
 import com.voscorp.vosmlp.attendance.Attendance;
 import com.voscorp.vosmlp.attendance.AttendanceRepository;
 import com.voscorp.vosmlp.attendance.AttendanceStatus;
+import com.voscorp.vosmlp.audit.AuditAction;
+import com.voscorp.vosmlp.audit.AuditService;
+import com.voscorp.vosmlp.auth.AppUser;
+import com.voscorp.vosmlp.auth.AppUserRepository;
 import com.voscorp.vosmlp.discipline.*;
 import com.voscorp.vosmlp.documents.*;
 import com.voscorp.vosmlp.students.Student;
 import com.voscorp.vosmlp.students.StudentRepository;
 import com.voscorp.vosmlp.students.StudentStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,19 +27,34 @@ public class AdminController {
     private final DisciplinaryNoticeRepository notices;
     private final ExpulsionProposalRepository proposals;
     private final MedicalApiMock medicalApi;
+    private final AuditService audit;
+    private final AppUserRepository users;
 
     public AdminController(AbsenceApplicationRepository applications,
                            AttendanceRepository attendances,
                            StudentRepository students,
                            DisciplinaryNoticeRepository notices,
                            ExpulsionProposalRepository proposals,
-                           MedicalApiMock medicalApi) {
+                           MedicalApiMock medicalApi,
+                           AuditService audit,
+                           AppUserRepository users) {
         this.applications = applications;
         this.attendances = attendances;
         this.students = students;
         this.notices = notices;
         this.proposals = proposals;
         this.medicalApi = medicalApi;
+        this.audit = audit;
+        this.users = users;
+    }
+
+    private AppUser currentUser(Authentication authentication) {
+        return users.findByUsername(authentication.getName()).orElseThrow();
+    }
+
+    private String appTarget(AbsenceApplication app) {
+        return "Заявление №" + app.getId() + " · " + app.getAttendance().getStudent().getFullName()
+                + " · " + app.getAttendance().getSubject();
     }
 
     @GetMapping("/admin")
@@ -46,7 +66,8 @@ public class AdminController {
     }
 
     @PostMapping("/admin/{id}/verify")
-    public String verify(@PathVariable Long id) {
+    public String verify(@PathVariable Long id, Authentication authentication) {
+        AppUser actor = currentUser(authentication);
         AbsenceApplication app = applications.findById(id).orElseThrow();
         if (app.getMedicalResult() != null) {
             return "redirect:/admin"; // уже проверено, повторно не создаём замечание
@@ -54,20 +75,27 @@ public class AdminController {
         MedicalResult result = medicalApi.verify(app);
         app.setMedicalResult(result);
         applications.save(app);
+        audit.log(actor, AuditAction.DOC_VERIFIED, appTarget(app), null, result.name(),
+                "Проверка через Medical API (имитация)");
 
         if (result != MedicalResult.VALID && !notices.existsByApplication(app)) {
             Student student = app.getAttendance().getStudent();
             notices.save(new DisciplinaryNotice(student, app, "Документ не прошёл проверку: " + result.name()));
             long count = notices.countByStudent(student);
+            audit.log(actor, AuditAction.NOTICE_CREATED, student.getFullName(), null,
+                    "замечаний: " + count, "Документ не прошёл проверку: " + result.name());
             if (count > 3 && !proposals.existsByStudentAndStatus(student, ProposalStatus.PENDING_ADMIN_APPROVAL)) {
                 proposals.save(new ExpulsionProposal(student, (int) count));
+                audit.log(actor, AuditAction.EXPULSION_PROPOSED, student.getFullName(), null,
+                        "ждёт решения администратора", "Замечаний: " + count);
             }
         }
         return "redirect:/admin";
     }
 
     @PostMapping("/admin/{id}/approve")
-    public String approve(@PathVariable Long id) {
+    public String approve(@PathVariable Long id, Authentication authentication) {
+        AppUser actor = currentUser(authentication);
         AbsenceApplication app = applications.findById(id).orElseThrow();
         if (app.getMedicalResult() == MedicalResult.VALID && app.getStatus() == ApplicationStatus.PENDING) {
             app.setStatus(ApplicationStatus.APPROVED);
@@ -75,22 +103,26 @@ public class AdminController {
             attendance.setStatus(AttendanceStatus.EXCUSED);
             attendances.save(attendance);
             applications.save(app);
+            audit.log(actor, AuditAction.DOC_APPROVED, appTarget(app), "без причины", "уважительная причина", null);
         }
         return "redirect:/admin";
     }
 
     @PostMapping("/admin/{id}/reject")
-    public String reject(@PathVariable Long id) {
+    public String reject(@PathVariable Long id, Authentication authentication) {
+        AppUser actor = currentUser(authentication);
         AbsenceApplication app = applications.findById(id).orElseThrow();
         if (app.getStatus() == ApplicationStatus.PENDING) {
             app.setStatus(ApplicationStatus.REJECTED);
             applications.save(app);
+            audit.log(actor, AuditAction.DOC_REJECTED, appTarget(app), "на рассмотрении", "отклонено", null);
         }
         return "redirect:/admin";
     }
 
     @PostMapping("/admin/proposals/{id}/confirm")
-    public String confirmExpulsion(@PathVariable Long id) {
+    public String confirmExpulsion(@PathVariable Long id, Authentication authentication) {
+        AppUser actor = currentUser(authentication);
         ExpulsionProposal p = proposals.findById(id).orElseThrow();
         if (p.getStatus() == ProposalStatus.PENDING_ADMIN_APPROVAL) {
             p.setStatus(ProposalStatus.CONFIRMED);
@@ -98,16 +130,20 @@ public class AdminController {
             student.setStatus(StudentStatus.EXPELLED);
             students.save(student);
             proposals.save(p);
+            audit.log(actor, AuditAction.EXPULSION_CONFIRMED, student.getFullName(), "учится", "отчислен",
+                    "Замечаний: " + p.getNoticeCount());
         }
         return "redirect:/admin";
     }
 
     @PostMapping("/admin/proposals/{id}/reject")
-    public String rejectExpulsion(@PathVariable Long id) {
+    public String rejectExpulsion(@PathVariable Long id, Authentication authentication) {
+        AppUser actor = currentUser(authentication);
         ExpulsionProposal p = proposals.findById(id).orElseThrow();
         if (p.getStatus() == ProposalStatus.PENDING_ADMIN_APPROVAL) {
             p.setStatus(ProposalStatus.REJECTED);
             proposals.save(p);
+            audit.log(actor, AuditAction.EXPULSION_REJECTED, p.getStudent().getFullName(), "ждёт решения", "отклонено", null);
         }
         return "redirect:/admin";
     }

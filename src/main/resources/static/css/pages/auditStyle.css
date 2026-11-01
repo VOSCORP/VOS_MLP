@@ -1,0 +1,7 @@
+/* auditStyle.css — журнал аудита */
+.audit-note { margin-bottom: 14px; color: var(--text-muted); }
+.audit-filter { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+.audit-filter input[type="text"] { flex: 1 1 260px; }
+.audit-table td { font-size: 14px; vertical-align: top; }
+.audit-table .nowrap { white-space: nowrap; }
+.audit-table .muted { color: var(--text-muted); font-size: 12px; }

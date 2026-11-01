@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Журнал аудита', 'auditStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar('audit')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Журнал аудита')}"></header>
+        <main class="page">
+
+            <p class="audit-note">Записи нельзя изменить или удалить. Показаны последние события (до 500).</p>
+
+            <form class="audit-filter" method="get" th:action="@{/admin/audit}">
+                <select name="action">
+                    <option value="">Все действия</option>
+                    <option th:each="a : ${actions}" th:value="${a.name()}" th:text="${a.label}"
+                            th:selected="${a.name() == selectedAction}"></option>
+                </select>
+                <select name="outcome">
+                    <option value="">Любой результат</option>
+                    <option value="OK" th:selected="${selectedOutcome == 'OK'}">Успешно</option>
+                    <option value="DENIED" th:selected="${selectedOutcome == 'DENIED'}">Отказано</option>
+                </select>
+                <input type="text" name="q" th:value="${q}" placeholder="Поиск по имени, объекту, примечанию">
+                <button class="btn btn-main" type="submit">Применить</button>
+            </form>
+
+            <p th:if="${#lists.isEmpty(events)}">Событий пока нет.</p>
+
+            <div class="table-wrap" th:unless="${#lists.isEmpty(events)}">
+                <table class="table audit-table">
+                    <tr>
+                        <th>Время</th><th>Кто</th><th>Действие</th><th>Объект</th><th>Было → Стало</th><th>Примечание</th><th>Результат</th>
+                    </tr>
+                    <tr th:each="e : ${events}">
+                        <td class="nowrap" th:text="${e.createdAtText}"></td>
+                        <td><b th:text="${e.actorName}"></b><br><span class="muted" th:text="${e.actorRole}"></span></td>
+                        <td th:text="${e.actionLabel}"></td>
+                        <td th:text="${e.target}"></td>
+                        <td>
+              <span th:if="${e.oldValue != null or e.newValue != null}">
+                <span th:text="${e.oldValue != null ? e.oldValue : '—'}"></span> →
+                <b th:text="${e.newValue != null ? e.newValue : '—'}"></b>
+              </span>
+                        </td>
+                        <td th:text="${e.note}"></td>
+                        <td>
+              <span class="chip" th:classappend="${e.outcome == 'OK'} ? 'ok' : 'bad'"
+                    th:text="${e.outcome == 'OK'} ? 'Успешно' : 'Отказано'"></span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+        </main>
+    </div>
+</div>
+</body>
+</html>

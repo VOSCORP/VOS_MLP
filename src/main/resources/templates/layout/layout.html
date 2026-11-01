@@ -31,6 +31,8 @@
            th:classappend="${active == 'grades'} ? 'active'" th:href="@{/grades}">Оценки</a>
         <a class="nav-item" th:if="${currentRole == 'ADMIN'}"
            th:classappend="${active == 'admin'} ? 'active'" th:href="@{/admin}">Администрирование</a>
+        <a class="nav-item" th:if="${currentRole == 'ADMIN'}"
+           th:classappend="${active == 'audit'} ? 'active'" th:href="@{/admin/audit}">Аудит</a>
         <span class="nav-item soon">Расписание <span class="nav-soon-tag">скоро</span></span>
     </nav>
     <div class="sidebar-foot">Учебный проект · Spring Boot</div>

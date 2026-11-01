@@ -1,5 +1,7 @@
 package com.voscorp.vosmlp.journal;
 
+import com.voscorp.vosmlp.audit.AuditAction;
+import com.voscorp.vosmlp.audit.AuditService;
 import com.voscorp.vosmlp.auth.AppUser;
 import com.voscorp.vosmlp.auth.AppUserRepository;
 import com.voscorp.vosmlp.auth.UserRole;
@@ -27,12 +29,13 @@ public class JournalController {
     private final DashboardService dashboards;
     private final JournalNotifier notifier;
     private final GrantService grantService;
+    private final AuditService audit;
 
     public JournalController(SubjectRepository subjects, JournalColumnRepository columns,
                              JournalEntryRepository entries, StudentRepository students,
                              JournalCalc calc, AppUserRepository users, JournalAccess access,
                              DashboardService dashboards, JournalNotifier notifier,
-                             GrantService grantService) {
+                             GrantService grantService, AuditService audit) {
         this.subjects = subjects;
         this.columns = columns;
         this.entries = entries;
@@ -43,6 +46,7 @@ public class JournalController {
         this.dashboards = dashboards;
         this.notifier = notifier;
         this.grantService = grantService;
+        this.audit = audit;
     }
 
     private AppUser currentUser(Authentication authentication) {
@@ -180,8 +184,11 @@ public class JournalController {
         JournalEntry existing = entries.findByStudentAndJournalColumn(student, column).orElse(null);
         String denied = access.checkCellEdit(user, column, existing, st, makesEmpty);
         if (denied != null) {
+            audit.denied(user, AuditAction.ACCESS_DENIED, cellTarget(student, column),
+                    "Попытка правки ячейки. Причина отказа: " + denied);
             return error(HttpStatus.FORBIDDEN, denied);
         }
+        String oldText = CellDescriber.describe(existing); // значение до правки для аудита
 
         if (sc != null && (sc < 0 || sc > 100)) {
             return error(HttpStatus.BAD_REQUEST, "Оценка должна быть от 0 до 100. Значение не сохранено.");
@@ -215,6 +222,18 @@ public class JournalController {
 
         if (saved != null) {
             notifier.notifyCell(student, column.getSubject().getName(), saved, user.getFullName());
+        }
+
+        if (saved != null || (makesEmpty && existing != null)) {
+            AuditAction action;
+            if (makesEmpty) {
+                action = AuditAction.CELL_CLEARED;
+            } else if (st == CellStatus.LATE || st == CellStatus.ABSENT) {
+                action = AuditAction.ATTENDANCE_MARK;
+            } else {
+                action = existing == null ? AuditAction.GRADE_SET : AuditAction.GRADE_CHANGED;
+            }
+            audit.log(user, action, cellTarget(student, column), oldText, CellDescriber.describe(saved), null);
         }
 
         List<JournalColumn> cols = columns.findByStudyGroupAndSubjectOrderByColumnDateAsc(
@@ -266,6 +285,12 @@ public class JournalController {
         body.put("restricted", !details);
         body.put("subjects", subjectList);
         return body;
+    }
+
+    private String cellTarget(Student student, JournalColumn column) {
+        return student.getFullName() + " · " + column.getSubject().getName() + " · "
+                + column.getStudyGroup().getName() + " · "
+                + column.getColumnDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
     }
 
     private ResponseEntity<Map<String, Object>> error(HttpStatus status, String message) {

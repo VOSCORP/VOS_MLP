@@ -1,5 +1,7 @@
 package com.voscorp.vosmlp.journal;
 
+import com.voscorp.vosmlp.audit.AuditAction;
+import com.voscorp.vosmlp.audit.AuditService;
 import com.voscorp.vosmlp.auth.AppUser;
 import com.voscorp.vosmlp.auth.AppUserRepository;
 import com.voscorp.vosmlp.auth.UserRole;
@@ -22,16 +24,18 @@ public class GrantService {
     private final SubjectRepository subjects;
     private final TeachingAssignmentRepository assignments;
     private final NotificationService notifications;
+    private final AuditService audit;
 
     public GrantService(JournalGrantRepository grants, AppUserRepository users, StudyGroupRepository groups,
                         SubjectRepository subjects, TeachingAssignmentRepository assignments,
-                        NotificationService notifications) {
+                        NotificationService notifications, AuditService audit) {
         this.grants = grants;
         this.users = users;
         this.groups = groups;
         this.subjects = subjects;
         this.assignments = assignments;
         this.notifications = notifications;
+        this.audit = audit;
     }
 
     public static String typeLabel(AccessType type) {
@@ -157,6 +161,12 @@ public class GrantService {
 
         grants.save(new JournalGrant(teacher, starosta, target, chosen, type, expires));
 
+        audit.log(teacher, AuditAction.ACCESS_GRANTED,
+                "Староста " + starosta.getFullName() + " · группа " + target.getName(),
+                null,
+                typeLabel(type) + " · " + chosen.stream().map(Subject::getName).sorted().collect(Collectors.joining(", ")),
+                "Действует до " + expires.format(FMT));
+
         // уведомления
         String subjectsText = chosen.stream().map(Subject::getName).sorted().collect(Collectors.joining(", "));
         String label = typeLabel(type);
@@ -193,6 +203,8 @@ public class GrantService {
         if (g == null || !g.getStarosta().getId().equals(starosta.getId())) { return "Доступ не найден"; }
         if (g.getStatus() != GrantStatus.ACTIVE || !g.isLive()) { return "Этот доступ уже не действует"; }
         g.setStatus(GrantStatus.DONE);
+        audit.log(starosta, AuditAction.ACCESS_DONE,
+                "Староста " + starosta.getFullName() + " · группа " + g.getStudyGroup().getName(), null, "выполнено", null);
         grants.save(g);
         notifications.send(g.getTeacher(), "Староста " + starosta.getFullName() + " выполнил работу в журнале (группа "
                 + g.getStudyGroup().getName() + "). Закройте доступ.", "/journal");
@@ -207,6 +219,8 @@ public class GrantService {
         if (!allowed) { return "Закрыть доступ может только выдавший его преподаватель"; }
         if (!g.isLive()) { return "Этот доступ уже закрыт"; }
         g.setStatus(GrantStatus.CLOSED);
+        audit.log(actor, AuditAction.ACCESS_CLOSED,
+                "Староста " + g.getStarosta().getFullName() + " · группа " + g.getStudyGroup().getName(), null, "закрыт", null);
         grants.save(g);
         notifications.send(g.getStarosta(), "Доступ к журналу (группа " + g.getStudyGroup().getName()
                 + ") закрыт преподавателем " + actor.getFullName() + ".", "/journal");
@@ -219,6 +233,9 @@ public class GrantService {
         for (JournalGrant g : grants.findByStatusIn(List.of(GrantStatus.ACTIVE, GrantStatus.DONE))) {
             if (!g.getExpiresAt().isAfter(now)) {
                 g.setStatus(GrantStatus.EXPIRED);
+                audit.system(AuditAction.ACCESS_EXPIRED,
+                        "Староста " + g.getStarosta().getFullName() + " · группа " + g.getStudyGroup().getName(),
+                        "Истекло время автозакрытия");
                 grants.save(g);
                 String text = "Доступ старосты " + g.getStarosta().getFullName() + " к журналу (группа "
                         + g.getStudyGroup().getName() + ") закрыт автоматически: истекло время.";
