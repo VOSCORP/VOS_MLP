@@ -1,2 +1,7 @@
-/* attendanceStyle.css — страница посещаемости (преподаватель) */
-.attendance-note { margin-bottom: 16px; color: var(--text-muted); }
+/* attendanceStyle.css — посещаемость: та же таблица, что в журнале */
+@import url("journalStyle.css");
+
+.cell.absent-excused { background: color-mix(in srgb, var(--cell-absent) 30%, white); font-weight: 800; }
+.cell.empty { background: #FFFFFF; }
+.legend.absent-excused { background: color-mix(in srgb, var(--cell-absent) 30%, white); }
+.journal .col-abs { font-weight: 700; }

@@ -5,27 +5,92 @@
 <div class="app">
   <aside th:replace="~{layout/layout :: sidebar('attendance')}"></aside>
   <div class="content">
-    <header th:replace="~{layout/layout :: topbar('Посещаемость занятий')}"></header>
+    <header th:replace="~{layout/layout :: topbar('Посещаемость')}"></header>
     <main class="page">
-      <p class="attendance-note">Отсутствие без подтверждённой причины получает статус «Без причины». После одобрения справки статус меняется.</p>
-      <div class="table-wrap">
-        <table class="table">
-          <tr><th>Студент</th><th>Группа</th><th>Предмет</th><th>Дата</th><th>Статус</th></tr>
-          <tr th:each="item : ${items}">
-            <td th:text="${item.student.fullName}"></td>
-            <td th:text="${item.student.groupName}"></td>
-            <td th:text="${item.subject}"></td>
-            <td th:text="${item.lessonDate}"></td>
-            <td>
-              <span class="chip"
-                    th:classappend="${item.status.name() == 'EXCUSED'} ? 'ok' : 'bad'"
-                    th:text="${item.status.name() == 'EXCUSED'} ? 'Уважительная причина' : 'Без причины'"></span>
-            </td>
-          </tr>
-        </table>
+
+      <p th:if="${empty}">Групп и предметов пока нет.</p>
+
+      <div th:unless="${empty}">
+        <form class="journal-filter" method="get" th:action="@{/attendance}">
+          <select name="groupId">
+            <option th:each="g : ${groups}" th:value="${g.id}" th:text="${g.name}"
+                    th:selected="${g.id == selectedGroupId}"></option>
+          </select>
+          <select name="subjectId">
+            <option th:each="s : ${subjects}" th:value="${s.id}" th:text="${s.name}"
+                    th:selected="${s.id == selectedSubjectId}"></option>
+          </select>
+          <button class="btn btn-main" type="submit">Показать</button>
+        </form>
+
+        <p class="journal-help" th:if="${editable}">Клик по ячейке: отметить опоздание или пропуск. Пустая ячейка значит, что студент присутствовал.
+          Пропуски, опоздания и посещаемость считаются за текущий период (между РК1, РК2, зачётной неделей и аттестацией).</p>
+        <p class="journal-help" th:unless="${editable}">Режим просмотра. Пропуски, опоздания и посещаемость считаются за текущий период.</p>
+
+        <div class="journal-scroll" th:attr="data-url=@{/attendance/cell},data-editable=${editable}">
+          <table class="journal">
+            <thead>
+            <tr>
+              <th class="col-num">№</th>
+              <th class="col-name">ФИО</th>
+              <th th:each="c : ${columnViews}" th:text="${c.label}"></th>
+              <th>Пропуски</th>
+              <th class="col-avg">Опоздания</th>
+              <th class="col-final">Посещ.</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="row, st : ${rows}" th:attr="data-name=${row.name}">
+              <td class="col-num" th:text="${st.count}"></td>
+              <td class="col-name" th:text="${row.name}"></td>
+              <td th:each="cell : ${row.cells}" th:class="${'cell ' + cell.css}"
+                  th:text="${cell.text}" th:title="${cell.title}"
+                  th:attr="data-student=${cell.studentId},data-column=${cell.columnId},data-state=${cell.state},data-minutes=${cell.minutes},data-excused=${cell.excused}"></td>
+              <td class="col-abs" th:text="${row.absences}"></td>
+              <td class="col-avg col-lates" th:text="${row.lates}"></td>
+              <td class="col-final col-percent"><span th:text="${row.percent}"></span>%</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="journal-legend">
+          <span class="legend late">Опоздание (минуты)</span>
+          <span class="legend absent">Н: пропуск без причины</span>
+          <span class="legend absent-excused">Н (ув.): с уважительной причиной</span>
+        </p>
       </div>
+
     </main>
   </div>
 </div>
+
+<!-- Панель отметки -->
+<aside id="attPanel" class="cell-panel" aria-label="Отметка посещаемости">
+  <h3 id="attWho">Студент</h3>
+  <p class="sub" id="attWhat">Занятие</p>
+
+  <label class="panel-field">Отметка
+    <select id="aState">
+      <option value="PRESENT">Присутствовал</option>
+      <option value="LATE">Опоздал</option>
+      <option value="ABSENT">Не пришёл</option>
+    </select>
+  </label>
+  <label class="panel-field" id="boxMinutes" hidden>Опоздал на (минут, 1–80)
+    <input type="number" id="aMinutes" min="1" max="80">
+  </label>
+  <label class="panel-field panel-check" id="boxExcused" hidden>
+    <input type="checkbox" id="aExcused"> Уважительная причина
+  </label>
+
+  <div class="panel-actions">
+    <button class="btn btn-main" type="button" id="attSave">Сохранить</button>
+    <button class="btn" type="button" id="attClose">Закрыть</button>
+  </div>
+  <p class="panel-msg" id="attMsg"></p>
+</aside>
+
+<script th:src="@{/js/attendance.js}"></script>
 </body>
 </html>
