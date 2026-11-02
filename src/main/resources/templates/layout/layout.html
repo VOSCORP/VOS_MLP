@@ -24,10 +24,7 @@
         <a class="nav-item" th:classappend="${active == 'home'} ? 'active'" th:href="@{/}">Главная</a>
         <a class="nav-item" th:classappend="${active == 'attendance'} ? 'active'" th:href="@{/attendance}">Посещаемость</a>
         <a class="nav-item" th:classappend="${active == 'journal'} ? 'active'" th:href="@{/journal}">Журнал</a>
-        <a class="nav-item" th:if="${currentRole == 'ADMIN' or currentRole == 'STUDENT' or currentRole == 'STAROSTA'}"
-           th:classappend="${active == 'documents'} ? 'active'" th:href="@{/student}">Документы</a>
-        <a class="nav-item" th:if="${currentRole == 'ADMIN' or currentRole == 'TEACHER'}"
-           th:classappend="${active == 'grades'} ? 'active'" th:href="@{/grades}">Оценки</a>
+        <a class="nav-item" th:classappend="${active == 'documents'} ? 'active'" th:href="@{/documents}">Документы</a>
         <a class="nav-item" th:if="${currentRole == 'ADMIN'}"
            th:classappend="${active == 'admin'} ? 'active'" th:href="@{/admin}">Администрирование</a>
         <a class="nav-item" th:if="${currentRole == 'ADMIN'}"

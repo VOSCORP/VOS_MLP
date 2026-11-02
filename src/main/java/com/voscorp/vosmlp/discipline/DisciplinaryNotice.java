@@ -1,9 +1,10 @@
 package com.voscorp.vosmlp.discipline;
 
-import com.voscorp.vosmlp.documents.AbsenceApplication;
 import com.voscorp.vosmlp.students.Student;
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 public class DisciplinaryNotice {
@@ -14,10 +15,11 @@ public class DisciplinaryNotice {
     @ManyToOne
     private Student student;
 
-    @ManyToOne
-    private AbsenceApplication application;
+    private Long applicationId; // номер связанной заявки (может быть пусто)
 
+    @Column(length = 400)
     private String reason;
+
     private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
@@ -25,9 +27,9 @@ public class DisciplinaryNotice {
 
     protected DisciplinaryNotice() {}
 
-    public DisciplinaryNotice(Student student, AbsenceApplication application, String reason) {
+    public DisciplinaryNotice(Student student, Long applicationId, String reason) {
         this.student = student;
-        this.application = application;
+        this.applicationId = applicationId;
         this.reason = reason;
         this.createdAt = LocalDateTime.now();
         this.status = NoticeStatus.ACTIVE;
@@ -35,8 +37,12 @@ public class DisciplinaryNotice {
 
     public Long getId() { return id; }
     public Student getStudent() { return student; }
-    public AbsenceApplication getApplication() { return application; }
+    public Long getApplicationId() { return applicationId; }
     public String getReason() { return reason; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public NoticeStatus getStatus() { return status; }
+
+    public String getCreatedAtText() {
+        return createdAt.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+    }
 }
