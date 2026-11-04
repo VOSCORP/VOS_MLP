@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Сводка посещаемости', 'adminStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar('attsummary')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Сводка посещаемости')}"></header>
+        <main class="page">
+
+            <p class="admin-note">Данные за текущий период группы (между РК1, РК2, зачётной неделей и аттестацией).
+                Дисциплинарка здесь не выдаётся: вы пишете студенту письмо и спрашиваете, что произошло.</p>
+
+            <h2 class="section-title" style="margin-top:0;">Сработавшие пороги</h2>
+            <p th:if="${#lists.isEmpty(summary.alerts)}">Пока ни один порог не срабатывал.</p>
+            <div class="table-wrap" th:unless="${#lists.isEmpty(summary.alerts)}">
+                <table class="table">
+                    <tr><th>Студент</th><th>Группа</th><th>Правило</th><th>Подробности</th><th>Дата</th><th></th></tr>
+                    <tr th:each="a : ${summary.alerts}">
+                        <td th:text="${a.studentName}"></td>
+                        <td th:text="${a.groupName}"></td>
+                        <td th:text="${a.ruleLabel}"></td>
+                        <td th:text="${a.details}"></td>
+                        <td th:text="${a.dateText}"></td>
+                        <td>
+                            <a class="btn" th:if="${a.accountId != null}"
+                               th:href="@{/messages/new(to=${a.accountId},subject=${a.mailSubject},body=${a.mailBody})}">Написать письмо</a>
+                            <span class="muted" th:if="${a.accountId == null}">нет аккаунта</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <h2 class="section-title">Превышают пороги сейчас</h2>
+            <p th:if="${#lists.isEmpty(summary.live)}">Сейчас нет студентов, превысивших пороги.</p>
+            <div class="table-wrap" th:unless="${#lists.isEmpty(summary.live)}">
+                <table class="table">
+                    <tr><th>Студент</th><th>Группа</th><th>Что превышено</th><th></th></tr>
+                    <tr th:each="r : ${summary.live}">
+                        <td th:text="${r.studentName}"></td>
+                        <td th:text="${r.groupName}"></td>
+                        <td><div th:each="line : ${r.lines}" th:text="${line}"></div></td>
+                        <td>
+                            <a class="btn" th:if="${r.accountId != null}"
+                               th:href="@{/messages/new(to=${r.accountId},subject=${r.mailSubject},body=${r.mailBody})}">Написать письмо</a>
+                            <span class="muted" th:if="${r.accountId == null}">нет аккаунта</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <h2 class="section-title">Рейтинг опозданий по предметам</h2>
+            <p th:if="${#lists.isEmpty(summary.lateRanks)}">Опозданий в текущем периоде нет.</p>
+            <div class="table-wrap" th:unless="${#lists.isEmpty(summary.lateRanks)}">
+                <table class="table">
+                    <tr><th>Группа</th><th>Предмет</th><th>Больше всего опозданий</th></tr>
+                    <tr th:each="r : ${summary.lateRanks}">
+                        <td th:text="${r.groupName}"></td>
+                        <td th:text="${r.subjectName}"></td>
+                        <td><div th:each="line : ${r.lines}" th:text="${line}"></div></td>
+                    </tr>
+                </table>
+            </div>
+
+            <h2 class="section-title">Пропуски по всем предметам</h2>
+            <p th:if="${#lists.isEmpty(summary.absenceRanks)}">Пропусков в текущем периоде нет.</p>
+            <div class="table-wrap" th:unless="${#lists.isEmpty(summary.absenceRanks)}">
+                <table class="table">
+                    <tr><th>Студент</th><th>Группа</th><th>Всего пропусков</th><th>Без причины</th><th>С причиной</th><th>Посещаемость</th></tr>
+                    <tr th:each="r : ${summary.absenceRanks}">
+                        <td th:text="${r.studentName}"></td>
+                        <td th:text="${r.groupName}"></td>
+                        <td th:text="${r.absences}"></td>
+                        <td th:text="${r.unexcused}"></td>
+                        <td th:text="${r.excused}"></td>
+                        <td><span th:text="${r.percent}"></span>%</td>
+                    </tr>
+                </table>
+            </div>
+
+        </main>
+    </div>
+</div>
+</body>
+</html>

@@ -29,10 +29,12 @@ public class AttendanceController {
     private final StudentRepository students;
     private final AppUserRepository users;
     private final AuditService audit;
+    private final AttendanceAlertService alertService;
 
     public AttendanceController(AttendanceAccess access, AttendanceCalc calc, AttendanceRecordRepository records,
                                 AttendanceNotifier notifier, JournalColumnRepository columns,
-                                StudentRepository students, AppUserRepository users, AuditService audit) {
+                                StudentRepository students, AppUserRepository users, AuditService audit,
+                                AttendanceAlertService alertService) {
         this.access = access;
         this.calc = calc;
         this.records = records;
@@ -41,6 +43,7 @@ public class AttendanceController {
         this.students = students;
         this.users = users;
         this.audit = audit;
+        this.alertService = alertService;
     }
 
     private AppUser currentUser(Authentication authentication) {
@@ -186,6 +189,7 @@ public class AttendanceController {
         if (!oldText.equals(newText)) {
             audit.log(user, AuditAction.ATTENDANCE_MARK, target, oldText, newText, null);
             notifier.notifyMark(student, column, saved, user.getFullName());
+            alertService.check(student); // проверка порогов: при срабатывании админы получат уведомление
         }
 
         // обновлённая статистика строки (за текущий период)

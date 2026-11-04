@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Письма', 'messagesStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar('messages')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Письма')}"></header>
+        <main class="page">
+
+            <p class="msg-flash ok" th:if="${ok}" th:text="${ok}"></p>
+
+            <div class="msg-actions" th:if="${canCompose}">
+                <a class="btn btn-main" th:href="@{/messages/new}">Новое письмо</a>
+            </div>
+
+            <p th:if="${#lists.isEmpty(threads)}">Писем пока нет.</p>
+
+            <ul class="msg-list">
+                <li th:each="t : ${threads}">
+                    <a class="card msg-item" th:classappend="${t.unread} ? 'unread'" th:href="@{/messages/{id}(id=${t.id})}">
+                        <div class="msg-main">
+                            <b th:text="${t.subject}"></b>
+                            <span class="muted" th:text="${t.otherName + ' · ' + t.otherRole}"></span>
+                        </div>
+                        <div class="msg-side">
+                            <span class="chip" th:if="${t.stateLabel != ''}" th:classappend="${t.stateClass}" th:text="${t.stateLabel}"></span>
+                            <span class="msg-time" th:text="${t.updatedText}"></span>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+
+        </main>
+    </div>
+</div>
+</body>
+</html>

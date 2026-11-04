@@ -1,5 +1,6 @@
 package com.voscorp.vosmlp.auth;
 
+import com.voscorp.vosmlp.messages.LetterService;
 import com.voscorp.vosmlp.notifications.NotificationService;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
@@ -19,10 +20,12 @@ public class CurrentUserAdvice {
 
     private final AppUserRepository users;
     private final NotificationService notifications;
+    private final LetterService letters;
 
-    public CurrentUserAdvice(AppUserRepository users, NotificationService notifications) {
+    public CurrentUserAdvice(AppUserRepository users, NotificationService notifications, LetterService letters) {
         this.users = users;
         this.notifications = notifications;
+        this.letters = letters;
     }
 
     @ModelAttribute
@@ -33,6 +36,7 @@ public class CurrentUserAdvice {
             model.addAttribute("currentRole", u.getRole().name());
             model.addAttribute("currentRoleLabel", LABELS.get(u.getRole()));
             model.addAttribute("unreadCount", notifications.unreadCount(u));
+            model.addAttribute("unreadLetters", letters.unreadCount(u));
         });
     }
 }

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Новое письмо', 'messagesStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar('messages')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Новое письмо')}"></header>
+        <main class="page">
+
+            <p class="msg-flash bad" th:if="${error}" th:text="${error}"></p>
+
+            <form class="msg-form" th:action="@{/messages/send}" method="post">
+                <label>Кому
+                    <select name="recipientId" required>
+                        <option th:each="r : ${recipients}" th:value="${r.id}" th:text="${r.label}"
+                                th:selected="${selectedTo != null and r.id == selectedTo}"></option>
+                    </select>
+                </label>
+                <label>Тема
+                    <input type="text" name="subject" maxlength="200" th:value="${subjectPrefill}" required>
+                </label>
+                <label>Текст письма
+                    <textarea name="body" rows="8" maxlength="2000" th:text="${bodyPrefill}" required></textarea>
+                </label>
+                <p class="muted">На письма от администраторов и преподавателей получатель должен ответить.</p>
+                <div><button class="btn btn-main" type="submit">Отправить</button>
+                    <a class="btn" th:href="@{/messages}">Отмена</a></div>
+            </form>
+
+        </main>
+    </div>
+</div>
+</body>
+</html>

@@ -18,7 +18,9 @@ public enum AuditAction {
     NOTICE_CREATED("Дисциплинарное замечание"),
     EXPULSION_PROPOSED("Предложение об отчислении"),
     EXPULSION_CONFIRMED("Отчисление подтверждено"),
-    EXPULSION_REJECTED("Отчисление отклонено");
+    EXPULSION_REJECTED("Отчисление отклонено"),
+    LETTER_SENT("Письмо отправлено"),
+    ALERT_ATTENDANCE("Сработал порог посещаемости");
 
     private final String label;
 

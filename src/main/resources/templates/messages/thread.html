@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Письмо', 'messagesStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar('messages')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Письмо')}"></header>
+        <main class="page">
+
+            <p class="msg-flash bad" th:if="${error}" th:text="${error}"></p>
+
+            <div class="thread-head">
+                <div>
+                    <h2 th:text="${view.subject}"></h2>
+                    <span class="muted" th:text="${view.otherName + ' · ' + view.otherRole}"></span>
+                </div>
+                <span class="chip" th:if="${view.stateLabel != ''}" th:classappend="${view.stateClass}" th:text="${view.stateLabel}"></span>
+            </div>
+
+            <div class="bubbles">
+                <div class="bubble" th:each="l : ${letters}" th:classappend="${l.mine} ? 'mine'">
+                    <div class="bubble-meta"><b th:text="${l.senderName}"></b><span th:text="${l.timeText}"></span></div>
+                    <p th:text="${l.body}"></p>
+                </div>
+            </div>
+
+            <form class="msg-form" th:if="${canReply}" th:action="@{/messages/{id}/reply(id=${threadId})}" method="post">
+                <label>Ваш ответ
+                    <textarea name="body" rows="5" maxlength="2000" required></textarea>
+                </label>
+                <div><button class="btn btn-main" type="submit">Отправить ответ</button>
+                    <a class="btn" th:href="@{/messages}">К списку</a></div>
+            </form>
+            <p class="muted" th:unless="${canReply}">На письма от системы отвечать не нужно.
+                <a th:href="@{/messages}">К списку писем</a></p>
+
+        </main>
+    </div>
+</div>
+</body>
+</html>
