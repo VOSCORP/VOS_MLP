@@ -3,16 +3,162 @@
 <head th:replace="~{layout/layout :: head('Документы', 'documentsStyle.css')}"></head>
 <body>
 <div class="app">
-  <aside th:replace="~{layout/layout :: sidebar('documents')}"></aside>
-  <div class="content">
-    <header th:replace="~{layout/layout :: topbar('Документы')}"></header>
-    <main class="page">
-      <div class="card">
-        <h2 class="section-title" style="margin-top:0;">Документы и заявки</h2>
-        <p>Раздел перестраивается: здесь будут важные документы, мои документы и заявки по вашей роли.</p>
-      </div>
-    </main>
-  </div>
+    <aside th:replace="~{layout/layout :: sidebar('documents')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Документы')}"></header>
+        <main class="page">
+
+            <p class="doc-flash ok" th:if="${docMessage}" th:text="${docMessage}"></p>
+            <p class="doc-flash bad" th:if="${docError}" th:text="${docError}"></p>
+
+            <nav class="tabs">
+                <a class="tab" th:if="${showImportant}" th:classappend="${tab == 'important'} ? 'active'"
+                   th:href="@{/documents(tab='important')}">Важные документы</a>
+                <a class="tab" th:classappend="${tab == 'mine'} ? 'active'" th:href="@{/documents(tab='mine')}">Мои документы</a>
+                <a class="tab" th:classappend="${tab == 'requests'} ? 'active'" th:href="@{/documents(tab='requests')}">Заявки</a>
+            </nav>
+
+            <!-- ===== Важные документы ===== -->
+            <section th:if="${tab == 'important'}">
+                <p class="doc-note">Эти четыре документа прикрепляет администрация колледжа. Вы можете открыть и скачать их, но не удалить.</p>
+                <div class="doc-grid">
+                    <article class="doc-card" th:each="s : ${importantSlots}" th:classappend="${!s.present} ? 'missing'">
+                        <h3 th:text="${s.typeLabel}"></h3>
+                        <div th:if="${s.present}" class="doc-card-body">
+                            <span class="chip ok" th:text="${s.view.statusLabel}"></span>
+                            <button th:replace="~{documents/fragments :: openButton(${s.view})}"></button>
+                        </div>
+                        <p class="doc-missing" th:unless="${s.present}" th:text="${s.missingText}"></p>
+                    </article>
+                </div>
+            </section>
+
+            <!-- ===== Мои документы ===== -->
+            <section th:if="${tab == 'mine'}">
+                <h2 class="section-title" style="margin-top:0;">Документы из VOS Gov</h2>
+                <p class="doc-note">Эти документы берутся только из гос базы. Удалить их нельзя, а кнопка «Изменить» сверяет их с VOS Gov.</p>
+                <div class="doc-grid">
+                    <article class="doc-card" th:each="s : ${govSlots}" th:classappend="${!s.present} ? 'missing'">
+                        <h3 th:text="${s.typeLabel}"></h3>
+                        <div th:if="${s.present}" class="doc-card-body">
+                            <span class="chip" th:classappend="${s.view.statusState}" th:text="${s.view.statusLabel}"></span>
+                            <button th:replace="~{documents/fragments :: openButton(${s.view})}"></button>
+                        </div>
+                        <div th:unless="${s.present}" class="doc-card-body">
+                            <p class="doc-missing" th:text="${s.missingText}"></p>
+                            <form th:action="@{/documents/sync-type}" method="post">
+                                <input type="hidden" name="type" th:value="${s.typeCode}">
+                                <button class="btn" type="submit">Проверить в VOS Gov</button>
+                            </form>
+                        </div>
+                    </article>
+                </div>
+
+                <h2 class="section-title">Другие документы</h2>
+                <p class="doc-note">Любые документы в формате PDF (до 5 МБ). Они не зависят от VOS Gov.</p>
+
+                <form class="doc-form card" th:action="@{/documents/upload}" method="post" enctype="multipart/form-data">
+                    <label>Что это за документ
+                        <input type="text" name="title" maxlength="150" required>
+                    </label>
+                    <label>Для чего он нужен
+                        <input type="text" name="purpose" maxlength="300" required>
+                    </label>
+                    <label>Файл PDF
+                        <input type="file" name="file" accept="application/pdf,.pdf" required>
+                    </label>
+                    <div><button class="btn btn-main" type="submit">Загрузить</button></div>
+                </form>
+
+                <p class="doc-note" th:if="${#lists.isEmpty(otherDocs)}">Загруженных документов пока нет.</p>
+                <div class="table-wrap" th:unless="${#lists.isEmpty(otherDocs)}">
+                    <table class="table">
+                        <tr><th>Что это</th><th>Для чего</th><th>Файл</th><th>Дата</th><th></th></tr>
+                        <tr th:each="d : ${otherDocs}">
+                            <td th:text="${d.title}"></td>
+                            <td th:text="${d.note}"></td>
+                            <td th:text="${d.fileName}"></td>
+                            <td th:text="${d.statusLabel}"></td>
+                            <td>
+                                <div class="doc-actions">
+                                    <button th:replace="~{documents/fragments :: openButton(${d})}"></button>
+                                    <form th:action="@{/documents/{id}/delete(id=${d.id})}" method="post">
+                                        <button class="btn" type="submit">Удалить</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== Заявки ===== -->
+            <section th:if="${tab == 'requests'}">
+                <p class="doc-note">Здесь будут заявки по вашей роли. Пока они готовятся.</p>
+                <p th:if="${currentRole == 'PARENT'}">Для вашей роли заявок пока нет.</p>
+                <div class="doc-grid">
+                    <article class="doc-card soon" th:if="${currentRole == 'STUDENT' or currentRole == 'STAROSTA'}">
+                        <h3>Справка об образовании</h3>
+                        <p class="doc-missing">Справка о том, что вы учитесь в колледже. Выдаётся сразу, без администрации.</p>
+                        <span class="chip warn">Скоро</span>
+                    </article>
+                    <article class="doc-card soon" th:if="${currentRole == 'STUDENT' or currentRole == 'STAROSTA'}">
+                        <h3>Изменение посещаемости</h3>
+                        <p class="doc-missing">Закрыть пропуски без причины справкой. Рассматривают администраторы.</p>
+                        <span class="chip warn">Скоро</span>
+                    </article>
+                    <article class="doc-card soon" th:if="${currentRole == 'STUDENT' or currentRole == 'STAROSTA'}">
+                        <h3>Открытие спора</h3>
+                        <p class="doc-missing">Спор об оценке или посещаемости.</p>
+                        <span class="chip warn">Скоро</span>
+                    </article>
+                    <article class="doc-card soon" th:if="${currentRole == 'STAROSTA'}">
+                        <h3>Управление журналом</h3>
+                        <p class="doc-missing">Заявка преподавателю на доступ к журналу (с подписью).</p>
+                        <span class="chip warn">Скоро</span>
+                    </article>
+                    <article class="doc-card soon" th:if="${currentRole == 'TEACHER'}">
+                        <h3>Декретный отпуск</h3>
+                        <p class="doc-missing">Заявка с подтверждением из Medical System.</p>
+                        <span class="chip warn">Скоро</span>
+                    </article>
+                    <article class="doc-card soon" th:if="${currentRole == 'ADMIN'}">
+                        <h3>Заявки пользователей</h3>
+                        <p class="doc-missing">Сюда будут приходить заявки на решение администрации.</p>
+                        <span class="chip warn">Скоро</span>
+                    </article>
+                </div>
+            </section>
+
+        </main>
+    </div>
 </div>
+
+<!-- Окно документа: страница за ним размывается -->
+<div id="docModal" class="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+        <h3 id="mTitle">Документ</h3>
+        <dl class="modal-fields">
+            <div id="rType"><dt>Тип</dt><dd></dd></div>
+            <div id="rNumber"><dt>Номер</dt><dd></dd></div>
+            <div id="rIssuer"><dt>Кто выдал</dt><dd></dd></div>
+            <div id="rIssued"><dt>Дата выдачи</dt><dd></dd></div>
+            <div id="rExpiry"><dt>Срок действия</dt><dd></dd></div>
+            <div id="rStatus"><dt>Статус</dt><dd></dd></div>
+            <div id="rSource"><dt>Источник</dt><dd></dd></div>
+            <div id="rNote"><dt>Примечание</dt><dd></dd></div>
+        </dl>
+        <div class="modal-actions">
+            <a id="mDownload" class="btn btn-main" href="#">Скачать PDF</a>
+            <form id="mSyncForm" method="post" hidden>
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button class="btn" type="submit">Изменить</button>
+            </form>
+            <button id="mClose" class="btn" type="button">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/documents.js}"></script>
 </body>
 </html>

@@ -19,6 +19,9 @@ public enum AuditAction {
     EXPULSION_PROPOSED("Предложение об отчислении"),
     EXPULSION_CONFIRMED("Отчисление подтверждено"),
     EXPULSION_REJECTED("Отчисление отклонено"),
+    DOCUMENT_UPLOADED("Документ загружен"),
+    DOCUMENT_REMOVED("Документ удалён"),
+    DOCUMENT_SYNCED("Документ сверен с VOS Gov"),
     LETTER_SENT("Письмо отправлено"),
     ALERT_ATTENDANCE("Сработал порог посещаемости");
 

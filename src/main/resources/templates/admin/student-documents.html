@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Документы студентов', 'documentsStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar('admindocs')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Документы студентов')}"></header>
+        <main class="page">
+
+            <p class="doc-flash ok" th:if="${docMessage}" th:text="${docMessage}"></p>
+            <p class="doc-flash bad" th:if="${docError}" th:text="${docError}"></p>
+
+            <p class="doc-note">Важные документы студента: договор с колледжом, аттестат, договор с банком, справка об открытии счёта.
+                Студент их не удаляет. Новый файл того же типа заменяет старый.</p>
+
+            <form class="admin-doc-form card" th:action="@{/admin/documents/upload}" method="post" enctype="multipart/form-data">
+                <label>Студент
+                    <select name="ownerId" required>
+                        <option th:each="o : ${owners}" th:value="${o.id}" th:text="${o.fullName}"></option>
+                    </select>
+                </label>
+                <label>Документ
+                    <select name="type" required>
+                        <option th:each="t : ${types}" th:value="${t.name()}" th:text="${t.label}"></option>
+                    </select>
+                </label>
+                <label>Файл PDF
+                    <input type="file" name="file" accept="application/pdf,.pdf" required>
+                </label>
+                <button class="btn btn-main" type="submit">Прикрепить</button>
+            </form>
+
+            <p class="doc-note" th:if="${#lists.isEmpty(rows)}">Прикреплённых документов пока нет.</p>
+            <div class="table-wrap" th:unless="${#lists.isEmpty(rows)}">
+                <table class="table">
+                    <tr><th>Студент</th><th>Документ</th><th>Файл</th><th>Прикреплён</th><th>Кем</th><th></th></tr>
+                    <tr th:each="r : ${rows}">
+                        <td th:text="${r.ownerName}"></td>
+                        <td th:text="${r.typeLabel}"></td>
+                        <td th:text="${r.fileName}"></td>
+                        <td th:text="${r.uploadedText}"></td>
+                        <td th:text="${r.uploadedBy}"></td>
+                        <td>
+                            <div class="doc-actions">
+                                <a class="btn" th:href="@{/documents/{id}/download(id=${r.id})}">Скачать</a>
+                                <form th:action="@{/admin/documents/{id}/delete(id=${r.id})}" method="post">
+                                    <button class="btn" type="submit">Удалить</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+        </main>
+    </div>
+</div>
+</body>
+</html>

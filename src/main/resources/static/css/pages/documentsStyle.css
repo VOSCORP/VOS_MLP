@@ -1,6 +1,48 @@
-/* documentsStyle.css — страница документов студента */
-.absence-card { margin-bottom: 16px; }
-.absence-card .meta { color: var(--text-muted); font-size: 14px; }
-.absence-card .title { font-weight: 800; color: var(--heading); }
-.apply-form { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
-.apply-form input[type="text"] { flex: 1 1 240px; }
+/* documentsStyle.css — документы */
+[hidden] { display: none !important; }
+
+.doc-flash { padding: 12px 16px; border-radius: 12px; margin-bottom: 14px; font-weight: 700; }
+.doc-flash.ok { background: color-mix(in srgb, var(--status-ok) 25%, white); }
+.doc-flash.bad { background: color-mix(in srgb, var(--status-bad) 20%, white); }
+.doc-note { color: var(--text-muted); margin-bottom: 16px; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
+.tab { padding: 10px 20px; border-radius: 999px; font-weight: 700; background: var(--surface); border: 1.5px solid var(--line); }
+.tab.active { background: var(--primary); color: #FFFFFF; border-color: var(--primary); }
+
+.doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; margin-bottom: 8px; }
+.doc-card {
+  display: flex; flex-direction: column; gap: 14px; padding: 22px; min-height: 170px;
+  border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow);
+  border-top: 6px solid var(--primary);
+}
+.doc-card:nth-child(2n) { border-top-color: var(--twilight-violet); }
+.doc-card:nth-child(3n) { border-top-color: var(--pinkie-pink); }
+.doc-card h3 { color: var(--heading); }
+.doc-card-body { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; margin-top: auto; }
+.doc-card.missing, .doc-card.soon { background: transparent; box-shadow: none; border: 2px dashed var(--line); border-top-width: 2px; }
+.doc-missing { color: var(--text-muted); font-size: 14px; }
+
+.doc-form { display: flex; flex-direction: column; gap: 14px; max-width: 640px; margin-bottom: 20px; }
+.doc-form label { display: flex; flex-direction: column; gap: 6px; font-weight: 700; font-size: 14px; }
+.doc-form input[type="text"] { width: 100%; }
+.doc-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.doc-actions form { display: inline; }
+
+/* окно документа с размытым фоном */
+.modal {
+  position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 24px;
+  background: rgba(11, 30, 59, .35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.modal-card { width: min(520px, 100%); background: var(--surface); border-radius: 24px; padding: 28px; box-shadow: 0 30px 80px rgba(11, 30, 59, .4); }
+.modal-card h3 { color: var(--heading); margin-bottom: 16px; }
+.modal-fields { margin: 0 0 22px; display: flex; flex-direction: column; gap: 10px; }
+.modal-fields div { display: flex; justify-content: space-between; gap: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.modal-fields dt { color: var(--text-muted); font-size: 14px; }
+.modal-fields dd { margin: 0; font-weight: 700; text-align: right; }
+.modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.modal-actions form { display: inline; }
+
+/* админская форма загрузки */
+.admin-doc-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 24px; }
+.admin-doc-form label { display: flex; flex-direction: column; gap: 6px; font-weight: 700; font-size: 14px; }

@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<button class="btn btn-main" type="button" data-doc-open th:fragment="openButton(v)"
+        th:attr="data-title=${v.title},data-type=${v.typeLabel},data-number=${v.number},data-issuer=${v.issuedBy},data-issued=${v.issuedText},data-expiry=${v.expiryText},data-status=${v.statusLabel},data-source=${v.sourceLabel},data-note=${v.note},data-download=${v.downloadUrl},data-sync=${v.syncUrl}">Открыть</button>
+</body>
+</html>
