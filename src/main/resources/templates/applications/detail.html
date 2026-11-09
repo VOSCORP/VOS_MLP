@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Заявка', 'applicationsStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar(${adminMode} ? 'adminapps' : 'documents')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Заявка')}"></header>
+        <main class="page">
+
+            <p class="doc-flash ok" th:if="${appMessage}" th:text="${appMessage}"></p>
+            <p class="doc-flash bad" th:if="${appError}" th:text="${appError}"></p>
+
+            <div class="card app-card">
+                <div class="app-head">
+                    <div>
+                        <h2 th:text="${v.number + ' · ' + v.typeLabel}"></h2>
+                        <span class="muted" th:text="${v.applicantName + ' · ' + v.groupName + ' · ' + v.createdText}"></span>
+                    </div>
+                    <span class="chip" th:classappend="${v.statusClass}" th:text="${v.statusLabel}"></span>
+                </div>
+
+                <h3 class="app-sub">Что в заявке</h3>
+                <pre class="details-text" th:text="${v.details}"></pre>
+
+                <h3 class="app-sub">Комментарий заявителя</h3>
+                <p th:text="${v.comment}"></p>
+
+                <div th:if="${v.hasCertificate}">
+                    <h3 class="app-sub">Справка</h3>
+                    <p>Номер: <b th:text="${v.certificateNumber}"></b>
+                        <a class="btn" th:if="${v.certificateUrl != ''}" th:href="${v.certificateUrl}">Скачать PDF</a></p>
+                    <p>Проверка Medical API: <span class="chip" th:classappend="${v.medicalClass}" th:text="${v.medicalLabel}"></span></p>
+                </div>
+
+                <p th:if="${v.signTrace != ''}">Подписано через VOS Gov, номер подписи: <b th:text="${v.signTrace}"></b></p>
+                <p th:if="${v.decidedBy != ''}">Решение: <b th:text="${v.decidedBy}"></b>
+                    <span th:if="${v.decisionNote != ''}" th:text="${' · ' + v.decisionNote}"></span></p>
+
+                <div class="app-actions">
+                    <form th:if="${v.canSign}" th:action="@{/applications/{id}/sign(id=${v.id})}" method="post">
+                        <button class="btn btn-main" type="submit">Подписать через VOS Gov</button>
+                    </form>
+                    <form th:if="${v.canVerify}" th:action="@{/admin/applications/{id}/verify(id=${v.id})}" method="post">
+                        <button class="btn btn-main" type="submit">Проверить справку (Medical API)</button>
+                    </form>
+                    <form th:if="${v.canApprove}" th:action="@{/admin/applications/{id}/approve(id=${v.id})}" method="post">
+                        <button class="btn btn-main" type="submit">Одобрить</button>
+                    </form>
+                    <form th:if="${v.canReject}" class="reject-form" th:action="@{/admin/applications/{id}/reject(id=${v.id})}" method="post">
+                        <input type="text" name="note" maxlength="500" placeholder="Причина отказа (необязательно)">
+                        <button class="btn" type="submit">Отклонить</button>
+                    </form>
+                    <a class="btn" th:if="${adminMode}" th:href="@{/admin/applications}">К списку</a>
+                    <a class="btn" th:unless="${adminMode}" th:href="@{/documents(tab='requests')}">К заявкам</a>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+</body>
+</html>

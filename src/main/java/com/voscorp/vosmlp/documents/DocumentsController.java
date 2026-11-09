@@ -21,10 +21,13 @@ import java.util.List;
 public class DocumentsController {
     private final DocumentService service;
     private final AppUserRepository users;
+    private final com.voscorp.vosmlp.applications.ApplicationService applications;
 
-    public DocumentsController(DocumentService service, AppUserRepository users) {
+    public DocumentsController(DocumentService service, AppUserRepository users,
+                               com.voscorp.vosmlp.applications.ApplicationService applications) {
         this.service = service;
         this.users = users;
+        this.applications = applications;
     }
 
     private AppUser currentUser(Authentication authentication) {
@@ -47,6 +50,8 @@ public class DocumentsController {
         model.addAttribute("importantSlots", studentSide ? service.importantSlots(user) : List.of());
         model.addAttribute("govSlots", service.govSlots(user));
         model.addAttribute("otherDocs", service.otherDocs(user));
+        model.addAttribute("requestTypes", applications.typesFor(user));
+        model.addAttribute("myApplications", applications.mine(user));
         return "documents/documents";
     }
 

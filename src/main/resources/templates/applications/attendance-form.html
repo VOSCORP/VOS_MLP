@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Изменение посещаемости', 'applicationsStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar('documents')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Заявка: изменение посещаемости')}"></header>
+        <main class="page">
+
+            <p class="doc-flash bad" th:if="${appError}" th:text="${appError}"></p>
+
+            <p class="doc-note">Выберите пропуски без причины, которые закрывает ваша справка из Medical System.
+                Одна справка может закрыть несколько дней, в том числе целый период. Предметы, даты и преподавателей система соберёт сама.</p>
+
+            <p th:if="${#lists.isEmpty(absences)}">У вас нет пропусков без причины, которые можно включить в заявку.</p>
+
+            <form th:unless="${#lists.isEmpty(absences)}" class="app-form" th:action="@{/applications/attendance}"
+                  method="post" enctype="multipart/form-data">
+
+                <div class="range-box card">
+                    <b>Выбрать диапазон дат</b>
+                    <div class="range-row">
+                        <label>с <input type="date" id="rangeFrom"></label>
+                        <label>по <input type="date" id="rangeTo"></label>
+                        <button class="btn" type="button" id="rangeApply">Отметить</button>
+                        <button class="btn" type="button" id="selectAll">Все</button>
+                        <button class="btn" type="button" id="selectNone">Снять все</button>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="table">
+                        <tr><th></th><th>Дата</th><th>Предмет</th><th>Преподаватель</th><th>Отметил(а)</th></tr>
+                        <tr th:each="a : ${absences}" th:attr="data-date=${a.iso}">
+                            <td><input type="checkbox" name="recordIds" th:value="${a.id}"></td>
+                            <td th:text="${a.dateText}"></td>
+                            <td th:text="${a.subject}"></td>
+                            <td th:text="${a.teachers}"></td>
+                            <td th:text="${a.markedBy}"></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <label>Номер справки
+                    <input type="text" name="certificateNumber" maxlength="40" placeholder="Например, MED-2026-0123" required>
+                </label>
+                <label>Справка (PDF, до 5 МБ)
+                    <input type="file" name="file" accept="application/pdf,.pdf" required>
+                </label>
+                <label>Комментарий
+                    <textarea name="comment" rows="4" maxlength="1000" required></textarea>
+                </label>
+                <div>
+                    <button class="btn btn-main btn-big" type="submit">Сохранить и подписать через VOS Gov</button>
+                    <a class="btn btn-big" th:href="@{/documents(tab='requests')}">Отмена</a>
+                </div>
+            </form>
+
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/attendanceForm.js}"></script>
+</body>
+</html>

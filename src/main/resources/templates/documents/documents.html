@@ -94,39 +94,41 @@
 
             <!-- ===== Заявки ===== -->
             <section th:if="${tab == 'requests'}">
-                <p class="doc-note">Здесь будут заявки по вашей роли. Пока они готовятся.</p>
-                <p th:if="${currentRole == 'PARENT'}">Для вашей роли заявок пока нет.</p>
+                <p class="doc-note" th:if="${currentRole == 'ADMIN'}">Заявки пользователей приходят в раздел «Заявки» администрирования.
+                    <a class="btn btn-main" th:href="@{/admin/applications}">Открыть входящие</a></p>
+
+                <h2 class="section-title" style="margin-top:0;">Доступные заявки</h2>
+                <p class="doc-note" th:if="${#lists.isEmpty(requestTypes)}">Для вашей роли заявок пока нет.</p>
                 <div class="doc-grid">
-                    <article class="doc-card soon" th:if="${currentRole == 'STUDENT' or currentRole == 'STAROSTA'}">
-                        <h3>Справка об образовании</h3>
-                        <p class="doc-missing">Справка о том, что вы учитесь в колледже. Выдаётся сразу, без администрации.</p>
-                        <span class="chip warn">Скоро</span>
+                    <article class="doc-card" th:each="t : ${requestTypes}" th:classappend="${!t.ready} ? 'soon'">
+                        <h3 th:text="${t.label}"></h3>
+                        <p class="doc-missing" th:text="${t.description}"></p>
+                        <a class="btn btn-main" th:if="${t.ready}" th:href="@{${t.formPath}}">Подать заявку</a>
+                        <span class="chip warn" th:unless="${t.ready}">Скоро</span>
                     </article>
-                    <article class="doc-card soon" th:if="${currentRole == 'STUDENT' or currentRole == 'STAROSTA'}">
-                        <h3>Изменение посещаемости</h3>
-                        <p class="doc-missing">Закрыть пропуски без причины справкой. Рассматривают администраторы.</p>
-                        <span class="chip warn">Скоро</span>
-                    </article>
-                    <article class="doc-card soon" th:if="${currentRole == 'STUDENT' or currentRole == 'STAROSTA'}">
-                        <h3>Открытие спора</h3>
-                        <p class="doc-missing">Спор об оценке или посещаемости.</p>
-                        <span class="chip warn">Скоро</span>
-                    </article>
-                    <article class="doc-card soon" th:if="${currentRole == 'STAROSTA'}">
-                        <h3>Управление журналом</h3>
-                        <p class="doc-missing">Заявка преподавателю на доступ к журналу (с подписью).</p>
-                        <span class="chip warn">Скоро</span>
-                    </article>
-                    <article class="doc-card soon" th:if="${currentRole == 'TEACHER'}">
-                        <h3>Декретный отпуск</h3>
-                        <p class="doc-missing">Заявка с подтверждением из Medical System.</p>
-                        <span class="chip warn">Скоро</span>
-                    </article>
-                    <article class="doc-card soon" th:if="${currentRole == 'ADMIN'}">
-                        <h3>Заявки пользователей</h3>
-                        <p class="doc-missing">Сюда будут приходить заявки на решение администрации.</p>
-                        <span class="chip warn">Скоро</span>
-                    </article>
+                </div>
+
+                <h2 class="section-title">Мои заявки</h2>
+                <p class="doc-note" th:if="${#lists.isEmpty(myApplications)}">Вы ещё не подавали заявок.</p>
+                <div class="table-wrap" th:unless="${#lists.isEmpty(myApplications)}">
+                    <table class="table">
+                        <tr><th>№</th><th>Тип</th><th>Что</th><th>Дата</th><th>Статус</th><th></th></tr>
+                        <tr th:each="a : ${myApplications}">
+                            <td th:text="${a.number}"></td>
+                            <td th:text="${a.typeLabel}"></td>
+                            <td th:text="${a.title}"></td>
+                            <td th:text="${a.createdText}"></td>
+                            <td><span class="chip" th:classappend="${a.statusClass}" th:text="${a.statusLabel}"></span></td>
+                            <td>
+                                <div class="doc-actions">
+                                    <a class="btn" th:href="@{/applications/{id}(id=${a.id})}">Открыть</a>
+                                    <form th:if="${a.canSign}" th:action="@{/applications/{id}/sign(id=${a.id})}" method="post">
+                                        <button class="btn btn-main" type="submit">Подписать</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </section>
 

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('VOS Gov: подпись', 'govStyle.css')}"></head>
+<body class="login-body">
+<main class="login-card card gov-card">
+    <div class="brand login-brand"><span class="brand-mark"></span>VOS Gov</div>
+    <h1>Подпись документа</h1>
+
+    <dl class="gov-fields">
+        <div><dt>Система</dt><dd>VOS College</dd></div>
+        <div><dt>Действие</dt><dd th:text="${req.action.label}"></dd></div>
+        <div><dt>Что подписывается</dt><dd th:text="${req.summary}"></dd></div>
+        <div><dt>Подписывает</dt><dd th:text="${signerName}"></dd></div>
+        <div th:if="${req.traceNumber != null}"><dt>Номер подписи</dt><dd th:text="${req.traceNumber}"></dd></div>
+    </dl>
+
+    <div class="gov-steps">
+        <span class="gov-step" th:classappend="${req.status.name() != 'CREATED'} ? 'done'">1. Подписать</span>
+        <span class="gov-step" th:classappend="${req.status.name() == 'CONFIRMED'} ? 'done'">2. Подтвердить</span>
+    </div>
+
+    <div th:if="${req.status.name() == 'CREATED'}" class="gov-actions">
+        <p class="gov-hint">Подпись говорит системе, что это точно вы.</p>
+        <form th:action="@{/gov/sign/{t}/sign(t=${req.token})}" method="post">
+            <button class="btn btn-main btn-big" type="submit">Подписать</button>
+        </form>
+        <form th:action="@{/gov/sign/{t}/cancel(t=${req.token})}" method="post">
+            <button class="btn btn-big" type="submit">Отмена</button>
+        </form>
+    </div>
+
+    <div th:if="${req.status.name() == 'SIGNED'}" class="gov-actions">
+        <p class="gov-hint">Подтвердите, что вы осознанно согласны с действием.</p>
+        <form th:action="@{/gov/sign/{t}/confirm(t=${req.token})}" method="post">
+            <button class="btn btn-main btn-big" type="submit">Подтвердить</button>
+        </form>
+        <form th:action="@{/gov/sign/{t}/cancel(t=${req.token})}" method="post">
+            <button class="btn btn-big" type="submit">Отмена</button>
+        </form>
+    </div>
+
+    <div th:if="${req.status.name() == 'CONFIRMED' or req.status.name() == 'CANCELLED'}" class="gov-actions">
+        <p class="gov-hint" th:text="${req.status.name() == 'CONFIRMED'} ? 'Действие подписано.' : 'Подпись отменена.'"></p>
+        <a class="btn btn-main btn-big" th:href="@{${req.returnUrl}}">Вернуться в VOS College</a>
+    </div>
+</main>
+</body>
+</html>

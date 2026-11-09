@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Заявки', 'applicationsStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar('adminapps')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Заявки пользователей')}"></header>
+        <main class="page">
+
+            <p class="doc-note">Все поступившие заявки. Самые новые сверху.</p>
+            <p th:if="${#lists.isEmpty(items)}">Заявок пока нет.</p>
+
+            <div class="table-wrap" th:unless="${#lists.isEmpty(items)}">
+                <table class="table">
+                    <tr><th>№</th><th>Тип</th><th>Заявитель</th><th>Группа</th><th>Дата</th><th>Статус</th><th></th></tr>
+                    <tr th:each="a : ${items}">
+                        <td th:text="${a.number}"></td>
+                        <td th:text="${a.typeLabel}"></td>
+                        <td th:text="${a.applicantName}"></td>
+                        <td th:text="${a.groupName}"></td>
+                        <td th:text="${a.createdText}"></td>
+                        <td><span class="chip" th:classappend="${a.statusClass}" th:text="${a.statusLabel}"></span></td>
+                        <td><a class="btn" th:href="@{/admin/applications/{id}(id=${a.id})}">Открыть</a></td>
+                    </tr>
+                </table>
+            </div>
+
+        </main>
+    </div>
+</div>
+</body>
+</html>

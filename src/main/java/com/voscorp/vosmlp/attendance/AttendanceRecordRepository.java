@@ -11,4 +11,5 @@ public interface AttendanceRecordRepository extends JpaRepository<AttendanceReco
     List<AttendanceRecord> findByJournalColumnIn(List<JournalColumn> columns);
     Optional<AttendanceRecord> findByStudentAndJournalColumn(Student student, JournalColumn journalColumn);
     List<AttendanceRecord> findByStudentAndJournalColumnIn(Student student, List<JournalColumn> columns);
+    List<AttendanceRecord> findByStudent(Student student);
 }

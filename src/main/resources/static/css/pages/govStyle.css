@@ -1,0 +1,14 @@
+/* govStyle.css — временная страница подписи VOS Gov */
+@import url("loginStyle.css");
+
+.gov-card { width: min(560px, 100%); }
+.gov-fields { margin: 0 0 20px; display: flex; flex-direction: column; gap: 10px; }
+.gov-fields div { display: flex; justify-content: space-between; gap: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.gov-fields dt { color: var(--text-muted); font-size: 14px; }
+.gov-fields dd { margin: 0; font-weight: 700; text-align: right; }
+.gov-steps { display: flex; gap: 10px; margin-bottom: 18px; }
+.gov-step { flex: 1; text-align: center; padding: 10px; border-radius: 12px; font-weight: 700; background: var(--surface-soft); color: var(--text-muted); }
+.gov-step.done { background: var(--primary); color: #FFFFFF; }
+.gov-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.gov-actions form { display: inline; }
+.gov-hint { width: 100%; color: var(--text-muted); }

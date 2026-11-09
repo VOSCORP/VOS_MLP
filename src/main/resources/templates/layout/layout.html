@@ -33,6 +33,8 @@
            th:classappend="${active == 'attsummary'} ? 'active'" th:href="@{/admin/attendance}">Сводка посещаемости</a>
         <a class="nav-item" th:if="${currentRole == 'ADMIN'}"
            th:classappend="${active == 'admindocs'} ? 'active'" th:href="@{/admin/documents}">Документы студентов</a>
+        <a class="nav-item" th:if="${currentRole == 'ADMIN'}"
+           th:classappend="${active == 'adminapps'} ? 'active'" th:href="@{/admin/applications}">Заявки</a>
         <span class="nav-item soon">Расписание <span class="nav-soon-tag">скоро</span></span>
     </nav>
     <div class="sidebar-foot">Учебный проект · Spring Boot</div>

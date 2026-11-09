@@ -253,4 +253,18 @@ public class DocumentService {
         list.sort(Comparator.comparing(AppUser::getFullName));
         return list;
     }
+
+    // проверка PDF без сохранения: текст ошибки или null
+    public String validateUpload(MultipartFile file) {
+        byte[] bytes = read(file);
+        return checkPdf(file == null ? null : file.getOriginalFilename(), bytes);
+    }
+
+    // сохраняет уже проверенный PDF как «Другой документ»
+    public UserDocument saveOtherDocument(AppUser user, String title, String purpose, MultipartFile file) {
+        UserDocument d = docs.save(new UserDocument(user, DocType.OTHER, title, purpose, null, null, null, null, 1,
+                DocSource.UPLOAD, safeName(file.getOriginalFilename()), read(file), user.getFullName()));
+        audit.log(user, AuditAction.DOCUMENT_UPLOADED, "Документ «" + title + "»", null, d.getFileName(), null);
+        return d;
+    }
 }

@@ -22,6 +22,10 @@ public enum AuditAction {
     DOCUMENT_UPLOADED("Документ загружен"),
     DOCUMENT_REMOVED("Документ удалён"),
     DOCUMENT_SYNCED("Документ сверен с VOS Gov"),
+    SIGNED("Действие подписано (VOS Gov)"),
+    APPLICATION_SUBMITTED("Заявка отправлена"),
+    APPLICATION_APPROVED("Заявка одобрена"),
+    APPLICATION_REJECTED("Заявка отклонена"),
     LETTER_SENT("Письмо отправлено"),
     ALERT_ATTENDANCE("Сработал порог посещаемости");
 
