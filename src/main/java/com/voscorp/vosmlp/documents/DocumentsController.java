@@ -52,6 +52,7 @@ public class DocumentsController {
         model.addAttribute("otherDocs", service.otherDocs(user));
         model.addAttribute("requestTypes", applications.typesFor(user));
         model.addAttribute("myApplications", applications.mine(user));
+        model.addAttribute("incoming", applications.incoming(user));
         return "documents/documents";
     }
 

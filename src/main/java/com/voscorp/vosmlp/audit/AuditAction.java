@@ -26,6 +26,8 @@ public enum AuditAction {
     APPLICATION_SUBMITTED("Заявка отправлена"),
     APPLICATION_APPROVED("Заявка одобрена"),
     APPLICATION_REJECTED("Заявка отклонена"),
+    APPLICATION_FORWARDED("Заявка передана администрации"),
+    APPLICATION_RETURNED("Заявка возвращена преподавателю"),
     LETTER_SENT("Письмо отправлено"),
     ALERT_ATTENDANCE("Сработал порог посещаемости");
 

@@ -3,6 +3,7 @@ package com.voscorp.vosmlp.applications;
 public enum ApplicationStatus {
     PENDING_SIGNATURE("Ждёт подписи", "warn"),
     PENDING_DECISION("На рассмотрении", "warn"),
+    FORWARDED("Передана администрации", "warn"),
     APPROVED("Одобрена", "ok"),
     REJECTED("Отклонена", "bad");
 

@@ -20,8 +20,8 @@ public enum ApplicationType {
             "Спор об оценке или о посещаемости.",
             null, false, "", UserRole.STUDENT, UserRole.STAROSTA),
     JOURNAL_ACCESS("Управление журналом",
-            "Заявка преподавателю на доступ к журналу (с подписью).",
-            null, false, "", UserRole.STAROSTA),
+            "Заявка преподавателю на доступ к журналу (с подписью). Решает преподаватель.",
+            SignAction.JOURNAL_ACCESS, true, "/applications/journal-access/new", UserRole.STAROSTA),
     MATERNITY_LEAVE("Декретный отпуск",
             "Заявка с подтверждением из Medical System.",
             null, false, "", UserRole.TEACHER);

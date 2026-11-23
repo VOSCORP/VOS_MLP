@@ -18,6 +18,9 @@ public class Application {
     @ManyToOne
     private AppUser applicant;
 
+    @ManyToOne
+    private AppUser recipient; // кому адресована (например, преподаватель), может быть пусто
+
     @Enumerated(EnumType.STRING)
     @Column(name = "app_status")
     private ApplicationStatus status;
@@ -52,29 +55,34 @@ public class Application {
         this.createdAt = LocalDateTime.now();
     }
 
+    public Application(ApplicationType type, AppUser applicant, String title, String comment, String details,
+                       AppUser recipient) {
+        this(type, applicant, title, comment, details);
+        this.recipient = recipient;
+    }
+
     public void markSigned(String trace) {
         this.signTrace = trace;
         this.signedAt = LocalDateTime.now();
         this.status = ApplicationStatus.PENDING_DECISION;
     }
 
-    public void approve(String by, String note) {
-        this.status = ApplicationStatus.APPROVED;
+    private void decide(ApplicationStatus newStatus, String by, String note) {
+        this.status = newStatus;
         this.decidedBy = by;
         this.decidedAt = LocalDateTime.now();
         this.decisionNote = note;
     }
 
-    public void reject(String by, String note) {
-        this.status = ApplicationStatus.REJECTED;
-        this.decidedBy = by;
-        this.decidedAt = LocalDateTime.now();
-        this.decisionNote = note;
-    }
+    public void approve(String by, String note) { decide(ApplicationStatus.APPROVED, by, note); }
+    public void reject(String by, String note) { decide(ApplicationStatus.REJECTED, by, note); }
+    public void forward(String by, String note) { decide(ApplicationStatus.FORWARDED, by, note); }
+    public void returnToTeacher(String by, String note) { decide(ApplicationStatus.PENDING_DECISION, by, note); }
 
     public Long getId() { return id; }
     public ApplicationType getType() { return type; }
     public AppUser getApplicant() { return applicant; }
+    public AppUser getRecipient() { return recipient; }
     public ApplicationStatus getStatus() { return status; }
     public String getTitle() { return title; }
     public String getComment() { return comment; }

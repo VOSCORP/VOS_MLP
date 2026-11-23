@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
     List<Application> findByApplicantOrderByCreatedAtDesc(AppUser applicant);
+    List<Application> findByRecipientOrderByCreatedAtDesc(AppUser recipient);
     List<Application> findAllByOrderByCreatedAtDesc();
 }

@@ -51,6 +51,34 @@
                         <input type="text" name="note" maxlength="500" placeholder="Причина отказа (необязательно)">
                         <button class="btn" type="submit">Отклонить</button>
                     </form>
+
+                    <!-- решение преподавателя по заявке старосты -->
+                    <form th:if="${v.canTeacherDecide}" class="stack-form" th:action="@{/applications/{id}/teacher/approve(id=${v.id})}" method="post">
+                        <label>Закрыть доступ автоматически (обязательно)
+                            <input type="datetime-local" name="expiresAt" th:value="${v.defaultExpires}" required>
+                        </label>
+                        <button class="btn btn-main" type="submit">Одобрить и выдать доступ</button>
+                    </form>
+                    <form th:if="${v.canTeacherDecide}" class="stack-form" th:action="@{/applications/{id}/teacher/reject(id=${v.id})}" method="post">
+                        <input type="text" name="note" maxlength="500" placeholder="Причина отказа (необязательно)">
+                        <button class="btn" type="submit">Отклонить</button>
+                    </form>
+                    <form th:if="${v.canTeacherDecide}" class="stack-form" th:action="@{/applications/{id}/teacher/forward(id=${v.id})}" method="post">
+                        <input type="text" name="note" maxlength="500" placeholder="Что вызывает подозрение (обязательно)" required>
+                        <button class="btn" type="submit">Направить админам</button>
+                    </form>
+
+                    <!-- расследование администратора -->
+                    <a class="btn" th:if="${v.canAdminInvestigate}" th:href="@{/admin/audit(q=${v.applicantName})}">Открыть аудит по старосте</a>
+                    <form th:if="${v.canAdminInvestigate}" class="stack-form" th:action="@{/admin/applications/{id}/abuse(id=${v.id})}" method="post">
+                        <input type="text" name="note" maxlength="400" placeholder="Что показало расследование (обязательно)" required>
+                        <button class="btn btn-main" type="submit">Злоупотребление подтверждено</button>
+                    </form>
+                    <form th:if="${v.canAdminInvestigate}" class="stack-form" th:action="@{/admin/applications/{id}/clear(id=${v.id})}" method="post">
+                        <input type="text" name="note" maxlength="400" placeholder="Вывод проверки (обязательно)" required>
+                        <button class="btn" type="submit">Нарушения нет</button>
+                    </form>
+
                     <a class="btn" th:if="${adminMode}" th:href="@{/admin/applications}">К списку</a>
                     <a class="btn" th:unless="${adminMode}" th:href="@{/documents(tab='requests')}">К заявкам</a>
                 </div>

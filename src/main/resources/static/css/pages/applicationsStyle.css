@@ -20,3 +20,13 @@
 .app-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
 .app-actions form { display: inline-flex; gap: 8px; }
 .reject-form input[type="text"] { min-width: 260px; }
+
+
+.field { display: flex; flex-direction: column; gap: 8px; font-weight: 700; font-size: 14px; }
+.radio-row { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; flex-direction: row; }
+.stack-form { flex-direction: column; align-items: flex-start; padding: 12px; border-radius: 12px; background: var(--surface-soft); }
+.stack-form label { display: flex; flex-direction: column; gap: 6px; font-weight: 700; font-size: 14px; }
+.stack-form input[type="text"], .stack-form input[type="datetime-local"] {
+    font: inherit; padding: 9px 12px; min-width: 280px;
+    border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface);
+}

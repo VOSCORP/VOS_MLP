@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Управление журналом', 'applicationsStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar('documents')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Заявка: управление журналом')}"></header>
+        <main class="page">
+
+            <p class="doc-flash bad" th:if="${appError}" th:text="${appError}"></p>
+
+            <p class="doc-note">Заявку получит выбранный преподаватель. Предметы можно выбрать только те, которые он ведёт в выбранной группе.</p>
+
+            <form id="jForm" class="app-form" th:action="@{/applications/journal-access}" method="post"
+                  th:attr="data-own=${ownGroupId}">
+
+                <div class="field">Какая таблица
+                    <label class="radio-row"><input type="radio" name="scope" value="own" checked> Моей группы</label>
+                    <label class="radio-row"><input type="radio" name="scope" value="other"> Другой группы</label>
+                </div>
+
+                <label id="jOther" hidden>Группа
+                    <select name="targetGroupId" id="jTarget">
+                        <option th:each="g : ${groups}" th:value="${g.id}" th:text="${g.name}"></option>
+                    </select>
+                </label>
+
+                <label>Преподаватель
+                    <select name="teacherId" id="jTeacher" required>
+                        <option th:each="t : ${teachers}" th:value="${t.id}" th:text="${t.fullName}"></option>
+                    </select>
+                </label>
+
+                <div class="field">Предметы
+                    <div class="subject-block" th:each="b : ${blocks}"
+                         th:attr="data-teacher=${b.teacherId},data-group=${b.groupId}" hidden>
+                        <label class="radio-row" th:each="s : ${b.subjects}">
+                            <input type="checkbox" name="subjectIds" th:value="${s.id}" disabled> <span th:text="${s.name}"></span>
+                        </label>
+                    </div>
+                    <span class="muted" id="jNoSubjects" hidden>Этот преподаватель не ведёт предметов в выбранной группе.</span>
+                </div>
+
+                <label>Что нужно
+                    <select name="accessType">
+                        <option value="CHANGE">Изменить (только поставленные оценки)</option>
+                        <option value="FILL">Заполнить (только пустые ячейки)</option>
+                        <option value="BOTH">Изменить и заполнить</option>
+                    </select>
+                </label>
+
+                <label>Зачем нужен доступ
+                    <textarea name="comment" rows="4" maxlength="1000" required></textarea>
+                </label>
+
+                <div>
+                    <button class="btn btn-main btn-big" type="submit">Сохранить и подписать через VOS Gov</button>
+                    <a class="btn btn-big" th:href="@{/documents(tab='requests')}">Отмена</a>
+                </div>
+            </form>
+
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/journalAccessForm.js}"></script>
+</body>
+</html>

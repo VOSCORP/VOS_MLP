@@ -108,6 +108,24 @@
                     </article>
                 </div>
 
+                <div th:if="${currentRole == 'TEACHER'}">
+                    <h2 class="section-title">Входящие заявки</h2>
+                    <p class="doc-note" th:if="${#lists.isEmpty(incoming)}">Входящих заявок нет.</p>
+                    <div class="table-wrap" th:unless="${#lists.isEmpty(incoming)}">
+                        <table class="table">
+                            <tr><th>№</th><th>Тип</th><th>Заявитель</th><th>Что</th><th>Дата</th><th>Статус</th><th></th></tr>
+                            <tr th:each="a : ${incoming}">
+                                <td th:text="${a.number}"></td>
+                                <td th:text="${a.typeLabel}"></td>
+                                <td th:text="${a.applicantName}"></td>
+                                <td th:text="${a.title}"></td>
+                                <td th:text="${a.createdText}"></td>
+                                <td><span class="chip" th:classappend="${a.statusClass}" th:text="${a.statusLabel}"></span></td>
+                                <td><a class="btn btn-main" th:href="@{/applications/{id}(id=${a.id})}">Открыть</a></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
                 <h2 class="section-title">Мои заявки</h2>
                 <p class="doc-note" th:if="${#lists.isEmpty(myApplications)}">Вы ещё не подавали заявок.</p>
                 <div class="table-wrap" th:unless="${#lists.isEmpty(myApplications)}">

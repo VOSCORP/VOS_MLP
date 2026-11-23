@@ -44,12 +44,13 @@ public class ApplicationService {
     private final MedicalApiMock medicalApi;
     private final DisciplinaryNoticeRepository notices;
     private final ExpulsionProposalRepository proposals;
+    private final JournalAccessRequestService journalRequests;
 
     public ApplicationService(ApplicationRepository apps, AttendanceChangeRequestRepository details,
                               AttendanceRecordRepository records, TeachingAssignmentRepository assignments,
                               DocumentService documents, NotificationService notifications, AuditService audit,
                               MedicalApiMock medicalApi, DisciplinaryNoticeRepository notices,
-                              ExpulsionProposalRepository proposals) {
+                              ExpulsionProposalRepository proposals, JournalAccessRequestService journalRequests) {
         this.apps = apps;
         this.details = details;
         this.records = records;
@@ -60,6 +61,7 @@ public class ApplicationService {
         this.medicalApi = medicalApi;
         this.notices = notices;
         this.proposals = proposals;
+        this.journalRequests = journalRequests;
     }
 
     public List<ApplicationType> typesFor(AppUser user) {
@@ -80,11 +82,13 @@ public class ApplicationService {
         return list;
     }
 
-    // заявку видит автор и админ
+    // заявку видит автор, адресат (преподаватель) и админ
     public Application find(AppUser user, Long id) {
         Application a = id == null ? null : apps.findById(id).orElse(null);
         if (a == null) { return null; }
-        boolean ok = a.getApplicant().getId().equals(user.getId()) || user.getRole() == UserRole.ADMIN;
+        boolean ok = a.getApplicant().getId().equals(user.getId())
+                || user.getRole() == UserRole.ADMIN
+                || (a.getRecipient() != null && a.getRecipient().getId().equals(user.getId()));
         return ok ? a : null;
     }
 
@@ -128,6 +132,9 @@ public class ApplicationService {
         m.put("canVerify", adminMode && pending && d != null && mr == null);
         m.put("canApprove", adminMode && pending && d != null && mr == MedicalResult.VALID);
         m.put("canReject", adminMode && pending);
+        if (a.getType() == ApplicationType.JOURNAL_ACCESS) {
+            journalRequests.enrich(m, a, viewer, adminMode);
+        }
         return m;
     }
 
@@ -323,5 +330,14 @@ public class ApplicationService {
         notifications.send(a.getApplicant(), "Заявка №" + a.getId() + " отклонена."
                 + (reason.isEmpty() ? "" : " Причина: " + reason), "/applications/" + a.getId());
         return Result.ok("Заявка отклонена, студент уведомлён.");
+    }
+
+    // входящие заявки преподавателя (уже подписанные)
+    public List<Map<String, Object>> incoming(AppUser teacher) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (Application a : apps.findByRecipientOrderByCreatedAtDesc(teacher)) {
+            if (a.getStatus() != ApplicationStatus.PENDING_SIGNATURE) { list.add(view(a, teacher, false)); }
+        }
+        return list;
     }
 }
