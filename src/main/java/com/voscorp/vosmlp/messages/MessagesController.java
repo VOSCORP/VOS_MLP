@@ -8,6 +8,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Map;
+import java.util.stream.IntStream;
+
 @Controller
 public class MessagesController {
     private final LetterService service;
@@ -27,9 +30,11 @@ public class MessagesController {
         AppUser user = currentUser(authentication);
         model.addAttribute("threads", service.listFor(user));
         model.addAttribute("canCompose", service.canCompose(user));
+        model.addAttribute("canRequestRemoval", service.canRequestRemoval(user));
         return "messages/messages";
     }
 
+    // новое письмо админа или преподавателя
     @GetMapping("/messages/new")
     public String compose(@RequestParam(required = false) Long to,
                           @RequestParam(required = false) String subject,
@@ -38,6 +43,9 @@ public class MessagesController {
         AppUser user = currentUser(authentication);
         if (!service.canCompose(user)) { return "redirect:/messages"; }
         model.addAttribute("recipients", service.recipientsFor(user));
+        model.addAttribute("categories", LetterCategory.forStaff());
+        model.addAttribute("priorities", IntStream.rangeClosed(1, service.maxPriority(user)).boxed().toList());
+        model.addAttribute("defaultPriority", 5);
         model.addAttribute("selectedTo", to);
         model.addAttribute("subjectPrefill", subject == null ? "" : subject);
         model.addAttribute("bodyPrefill", body == null ? "" : body);
@@ -46,13 +54,36 @@ public class MessagesController {
 
     @PostMapping("/messages/send")
     public String send(@RequestParam Long recipientId, @RequestParam String subject, @RequestParam String body,
+                       @RequestParam String category, @RequestParam int priority,
                        Authentication authentication, RedirectAttributes redirect) {
-        String error = service.send(currentUser(authentication), recipientId, subject, body);
+        String error = service.send(currentUser(authentication), recipientId, subject, body, category, priority);
         if (error != null) {
             redirect.addFlashAttribute("error", error);
             return "redirect:/messages/new?to=" + recipientId;
         }
         redirect.addFlashAttribute("ok", "Письмо отправлено.");
+        return "redirect:/messages";
+    }
+
+    // запрос на снятие старосты (студент или родитель)
+    @GetMapping("/messages/removal")
+    public String removalForm(Authentication authentication, Model model) {
+        AppUser user = currentUser(authentication);
+        if (!service.canRequestRemoval(user)) { return "redirect:/messages"; }
+        Map<String, String> info = service.removalInfo(user);
+        model.addAttribute("info", info);
+        model.addAttribute("hasError", info.containsKey("error"));
+        return "messages/removal";
+    }
+
+    @PostMapping("/messages/removal-request")
+    public String removalSend(@RequestParam String body, Authentication authentication, RedirectAttributes redirect) {
+        String error = service.sendRemovalRequest(currentUser(authentication), body);
+        if (error != null) {
+            redirect.addFlashAttribute("error", error);
+            return "redirect:/messages/removal";
+        }
+        redirect.addFlashAttribute("ok", "Запрос отправлен куратору.");
         return "redirect:/messages";
     }
 

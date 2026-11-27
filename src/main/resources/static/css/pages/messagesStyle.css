@@ -27,3 +27,15 @@
   font: inherit; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px;
   background: var(--surface); color: var(--text);
 }
+
+/* ---- цвет письма по приоритету ---- */
+.msg-item.prio-low { border-left-color: var(--prio-low); }
+.msg-item.prio-mid { border-left-color: var(--prio-mid); }
+.msg-item.prio-high { border-left-color: var(--prio-high); background: color-mix(in srgb, var(--prio-high) 12%, white); }
+.msg-item.prio-urgent { border-left-color: var(--prio-urgent); background: color-mix(in srgb, var(--prio-urgent) 12%, white); }
+.msg-item.prio-critical { border-left-color: var(--prio-critical); background: color-mix(in srgb, var(--prio-critical) 16%, white); }
+
+.thread-badges { display: flex; align-items: center; gap: 10px; }
+.msg-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.msg-row label { flex: 1 1 200px; }
+.removal-info { max-width: 720px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 6px; }

@@ -9,4 +9,8 @@ public interface LetterThreadRepository extends JpaRepository<LetterThread, Long
     List<LetterThread> findByInitiatorOrRecipientOrderByUpdatedAtDesc(AppUser initiator, AppUser recipient);
     long countByRecipientAndUnreadForRecipientTrue(AppUser recipient);
     long countByInitiatorAndUnreadForInitiatorTrue(AppUser initiator);
+
+    // важные письма без ответа (для главной страницы преподавателя)
+    List<LetterThread> findByRecipientAndPriorityGreaterThanEqualAndRequiresReplyTrueAndAnsweredFalseOrderByUpdatedAtDesc(
+            AppUser recipient, int priority);
 }

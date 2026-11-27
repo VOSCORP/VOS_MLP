@@ -18,4 +18,11 @@ public class NotificationService {
     public long unreadCount(AppUser user) {
         return repo.countByRecipientAndSeenFalse(user);
     }
+
+    // Уведомление без всплывающего окна: только колокольчик и страница уведомлений
+    public void sendQuiet(AppUser recipient, String text, String link) {
+        Notification n = new Notification(recipient, text, link);
+        n.markToasted();
+        repo.save(n);
+    }
 }

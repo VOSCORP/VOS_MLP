@@ -24,12 +24,17 @@ public class LetterSeed implements CommandLineRunner {
         if (threads.count() > 0) { return; }
         AppUser admin = users.findByUsername("admin").orElse(null);
         AppUser student1 = users.findByUsername("student1").orElse(null);
+        AppUser parent1 = users.findByUsername("parent1").orElse(null);
         if (admin == null || student1 == null) { return; }
 
         service.sendFromSystem(student1, "Добро пожаловать в VOS College",
                 "Здесь вы будете получать письма от преподавателей, администрации и системы. На письма от системы отвечать не нужно.");
         service.send(admin, student1.getId(), "Вопрос о посещаемости",
                 "Здравствуйте, Алихан. За текущий период у вас есть пропуск без причины и опоздание. "
-                        + "Пожалуйста, объясните, что произошло.");
+                        + "Пожалуйста, объясните, что произошло.", "EXPLANATION", 6);
+        if (parent1 != null) {
+            service.sendRemovalRequest(parent1,
+                    "Староста группы редко вовремя отмечает посещаемость. Просим рассмотреть вопрос о его замене.");
+        }
     }
 }

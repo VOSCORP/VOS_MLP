@@ -10,20 +10,23 @@
 
             <p class="msg-flash ok" th:if="${ok}" th:text="${ok}"></p>
 
-            <div class="msg-actions" th:if="${canCompose}">
-                <a class="btn btn-main" th:href="@{/messages/new}">Новое письмо</a>
+            <div class="msg-actions">
+                <a class="btn btn-main" th:if="${canCompose}" th:href="@{/messages/new}">Новое письмо</a>
+                <a class="btn btn-main" th:if="${canRequestRemoval}" th:href="@{/messages/removal}">Запрос на снятие старосты</a>
             </div>
 
             <p th:if="${#lists.isEmpty(threads)}">Писем пока нет.</p>
 
             <ul class="msg-list">
                 <li th:each="t : ${threads}">
-                    <a class="card msg-item" th:classappend="${t.unread} ? 'unread'" th:href="@{/messages/{id}(id=${t.id})}">
+                    <a class="card msg-item" th:classappend="${t.prioClass + (t.unread ? ' unread' : '')}"
+                       th:href="@{/messages/{id}(id=${t.id})}">
                         <div class="msg-main">
                             <b th:text="${t.subject}"></b>
-                            <span class="muted" th:text="${t.otherName + ' · ' + t.otherRole}"></span>
+                            <span class="muted" th:text="${t.otherName + ' · ' + t.otherRole + ' · ' + t.categoryLabel}"></span>
                         </div>
                         <div class="msg-side">
+                            <span class="prio-badge" th:text="${t.priority}" title="Приоритет"></span>
                             <span class="chip" th:if="${t.stateLabel != ''}" th:classappend="${t.stateClass}" th:text="${t.stateLabel}"></span>
                             <span class="msg-time" th:text="${t.updatedText}"></span>
                         </div>

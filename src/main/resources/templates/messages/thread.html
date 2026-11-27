@@ -10,12 +10,15 @@
 
             <p class="msg-flash bad" th:if="${error}" th:text="${error}"></p>
 
-            <div class="thread-head">
+            <div class="thread-head" th:classappend="${view.prioClass}">
                 <div>
                     <h2 th:text="${view.subject}"></h2>
-                    <span class="muted" th:text="${view.otherName + ' · ' + view.otherRole}"></span>
+                    <span class="muted" th:text="${view.otherName + ' · ' + view.otherRole + ' · ' + view.categoryLabel}"></span>
                 </div>
-                <span class="chip" th:if="${view.stateLabel != ''}" th:classappend="${view.stateClass}" th:text="${view.stateLabel}"></span>
+                <div class="thread-badges">
+                    <span class="prio-badge" th:text="${'Приоритет ' + view.priority}"></span>
+                    <span class="chip" th:if="${view.stateLabel != ''}" th:classappend="${view.stateClass}" th:text="${view.stateLabel}"></span>
+                </div>
             </div>
 
             <div class="bubbles">

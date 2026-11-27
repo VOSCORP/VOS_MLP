@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head('Запрос на снятие старосты', 'messagesStyle.css')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{layout/layout :: sidebar('messages')}"></aside>
+    <div class="content">
+        <header th:replace="~{layout/layout :: topbar('Запрос на снятие старосты')}"></header>
+        <main class="page">
+
+            <p class="msg-flash bad" th:if="${error}" th:text="${error}"></p>
+            <p class="msg-flash bad" th:if="${hasError}" th:text="${info.error}"></p>
+
+            <div th:unless="${hasError}">
+                <div class="card removal-info">
+                    <p>Группа: <b th:text="${info.group}"></b></p>
+                    <p>Староста: <b th:text="${info.starosta}"></b></p>
+                    <p>Письмо получит куратор группы: <b th:text="${info.curator}"></b></p>
+                    <p class="muted">Приоритет письма всегда 8. Куратор должен ответить в течение 36 часов.</p>
+                </div>
+
+                <form class="msg-form" th:action="@{/messages/removal-request}" method="post">
+                    <label>Почему вы просите снять старосту
+                        <textarea name="body" rows="8" maxlength="2000" required></textarea>
+                    </label>
+                    <div><button class="btn btn-main" type="submit">Отправить куратору</button>
+                        <a class="btn" th:href="@{/messages}">Отмена</a></div>
+                </form>
+            </div>
+            <p th:if="${hasError}"><a class="btn" th:href="@{/messages}">К письмам</a></p>
+
+        </main>
+    </div>
+</div>
+</body>
+</html>

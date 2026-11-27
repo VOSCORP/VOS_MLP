@@ -17,13 +17,25 @@
                                 th:selected="${selectedTo != null and r.id == selectedTo}"></option>
                     </select>
                 </label>
+                <div class="msg-row">
+                    <label>Категория
+                        <select name="category">
+                            <option th:each="c : ${categories}" th:value="${c.name()}" th:text="${c.label}"></option>
+                        </select>
+                    </label>
+                    <label>Приоритет (1–10)
+                        <select name="priority">
+                            <option th:each="p : ${priorities}" th:value="${p}" th:text="${p}" th:selected="${p == defaultPriority}"></option>
+                        </select>
+                    </label>
+                </div>
                 <label>Тема
                     <input type="text" name="subject" maxlength="200" th:value="${subjectPrefill}" required>
                 </label>
                 <label>Текст письма
                     <textarea name="body" rows="8" maxlength="2000" th:text="${bodyPrefill}" required></textarea>
                 </label>
-                <p class="muted">На письма от администраторов и преподавателей получатель должен ответить.</p>
+                <p class="muted">На письма от администраторов и преподавателей получатель должен ответить. Цвет письма зависит от приоритета.</p>
                 <div><button class="btn btn-main" type="submit">Отправить</button>
                     <a class="btn" th:href="@{/messages}">Отмена</a></div>
             </form>

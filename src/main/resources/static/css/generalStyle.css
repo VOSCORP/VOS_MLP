@@ -148,3 +148,23 @@ input[type="text"]:focus, select:focus { border-color: var(--primary); }
   box-shadow: 0 12px 30px rgba(11, 30, 59, .35);
 }
 .notice-toast a { color: var(--snow-sky); font-weight: 800; }
+
+
+/* ---- приоритеты писем ---- */
+:root {
+  --prio-low: #A8DFFF;
+  --prio-mid: #F7E85A;
+  --prio-high: #F5A03A;
+  --prio-urgent: #E8403C;
+  --prio-critical: #8B0A1A;
+}
+.prio-badge {
+  display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;
+  min-width: 28px; height: 28px; padding: 0 10px; border-radius: 999px;
+  font-weight: 800; font-size: 13px; color: var(--text); background: var(--prio-low);
+}
+.prio-low .prio-badge { background: var(--prio-low); }
+.prio-mid .prio-badge { background: var(--prio-mid); }
+.prio-high .prio-badge { background: var(--prio-high); }
+.prio-urgent .prio-badge { background: var(--prio-urgent); color: #FFFFFF; }
+.prio-critical .prio-badge { background: var(--prio-critical); color: #FFFFFF; }

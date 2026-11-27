@@ -21,6 +21,12 @@ public class LetterThread {
     @ManyToOne
     private AppUser recipient;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "letter_category")
+    private LetterCategory category;
+
+    private int priority; // 1–10
+
     private boolean requiresReply;
     private boolean answered;
     private boolean unreadForInitiator;
@@ -30,11 +36,14 @@ public class LetterThread {
 
     protected LetterThread() {}
 
-    public LetterThread(String subject, AppUser initiator, AppUser recipient, boolean requiresReply) {
+    public LetterThread(String subject, AppUser initiator, AppUser recipient, boolean requiresReply,
+                        LetterCategory category, int priority) {
         this.subject = subject;
         this.initiator = initiator;
         this.recipient = recipient;
         this.requiresReply = requiresReply;
+        this.category = category;
+        this.priority = priority;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
     }
@@ -71,6 +80,8 @@ public class LetterThread {
     public String getSubject() { return subject; }
     public AppUser getInitiator() { return initiator; }
     public AppUser getRecipient() { return recipient; }
+    public LetterCategory getCategory() { return category; }
+    public int getPriority() { return priority; }
     public boolean isRequiresReply() { return requiresReply; }
     public boolean isAnswered() { return answered; }
     public boolean isUnreadForInitiator() { return unreadForInitiator; }
